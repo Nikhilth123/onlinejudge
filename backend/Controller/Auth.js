@@ -4,9 +4,15 @@ import generateToken from "../Utils/generatetoken.js";
 
 export const handleusersignup=async(req,resp)=>{
     const {name,email,password,role}=req.body;
-    if(!name||!email||!password||!role){
-        resp.status(400).json({msg:"Enter all fields with valid credentials"});
+    if(!name||!email||!password||!role){   
+       return resp.status(400).json({msg:"Enter all fields with valid credentials"});
     }
+   
+     if (password.length < 6) {
+      
+    return resp.status(400).json({ msg: "Password must be at least 6 characters long" });
+  }
+
      const existingUser = await User.findOne({ email });
   if (existingUser) {
     return resp.status(409).json({ msg: "User already exists" });

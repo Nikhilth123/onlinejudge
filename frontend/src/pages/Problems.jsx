@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 function Problems() {
+  useEffect(()=>{},[])
   return (
     <div>Problems</div>
   )
