@@ -11,6 +11,7 @@ import Login from './pages/Login.jsx'
 import { AuthProvider } from '../context/AuthcontextProvider.jsx'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AddProblemForm  from './pages/AddProblemForm.jsx'
 
 const router=createBrowserRouter([
   {
@@ -19,7 +20,7 @@ const router=createBrowserRouter([
   children:[
     {
       path:'',
-      element:<Home/>
+      element:<Home></Home>
     },
     {
       path:'/problems',

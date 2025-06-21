@@ -65,7 +65,15 @@ export const handleuserlogin=async(req,resp)=>{
 }
 
 export const handleuserlogout=(req,resp)=>{
-    resp.clearCookie("token");
-    resp.status(200).json({msg:"User logged out successfully"});
+    try {resp.clearCookie("token",{
+    httpOnly: true,
+    secure: false,       
+    sameSite: "Strict"
+  });
+    return resp.status(200).json({msg:"User logged out successfully"});
+}catch(err){
+  console.error("Logout error:", error);
+    return resp.status(500).json({ msg: "Logout failed", error: error.message });
+}
 }
 
