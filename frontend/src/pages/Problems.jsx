@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import Authcontext from '../../context/Authcontext';
 
 function Problems() {
+  const {user}=useContext(Authcontext);
+  const navigate=useNavigate()
   const [problemData, setProblemData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('All');
@@ -57,19 +62,27 @@ function Problems() {
       </div>
 
       
-      {problemData.length === 0 ? (
-        <p className="text-gray-500">No matching problems found.</p>
-      ) : (
-        problemData.map((problem) => (
-          <Link
-            key={problem._id}
-            to={`/problems/${problem._id}`}
-            className="block bg-gray-100 hover:bg-gray-700 hover:text-white text-gray-800 px-4 py-3 rounded-md mb-3 transition duration-200 text-left"
-          >
-            {problem.title}
-          </Link>
-        ))
-      )}
+    {problemData.map((problem) => (
+  <div
+    key={problem._id}
+    className="flex items-center justify-between bg-gray-100 hover:bg-gray-700 hover:text-white text-gray-800 px-4 py-3 rounded-md mb-3 transition duration-200"
+  >
+    <Link to={`/problems/${problem._id}`} className="flex-grow text-left">
+      {problem.title}
+    </Link>
+
+   {user&&user.role=='admin'&&(
+    <button
+      onClick={() => navigate(`/problems/edit/${problem._id}`)}
+      className="ml-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+    >
+      Edit
+    </button>
+   )}
+    
+  </div>
+))}
+
 
       <div className="flex justify-center gap-2 mt-4">
   <button

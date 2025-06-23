@@ -10,6 +10,6 @@ const router= express.Router();
 router.get('/', getAllProblems);
 router.get('/:id',getProblemById);
 router.post('/addproblem',  upload.single("testCasesFile"), addProblem,);
-router.put('/:id',adminmiddlewares,updateproblem,);
-router.delete('/:id',adminmiddlewares, deleteproblem);
+router.put('/edit/:id',updateproblem,);
+router.delete('delete/:id',adminmiddlewares, deleteproblem);
 export default router;

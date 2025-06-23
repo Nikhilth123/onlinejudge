@@ -30,10 +30,11 @@ export const getAllProblems = async (req, res) => {
 }
 
 export const getProblemById = async (req, res) => {
-  const { id } = req.params.id;
+  const { id } = req.params;
   try {
     const problem = await Problem.findById(id);
     if (!problem) {
+      console.log("here");
       return res.status(404).json({ msg: "Problem not found" });
     }
     res.status(200).json(problem);

@@ -12,30 +12,52 @@ import { AuthProvider } from '../context/AuthcontextProvider.jsx'
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddProblemForm  from './pages/AddProblemForm.jsx'
+import EditProblemForm from './pages/EditProblemForm.jsx'
+import Notfound from './pages/Notfound.jsx'
+import ErrorPage from './pages/ErrorPage.jsx'
 
 const router=createBrowserRouter([
   {
   path:'/',
   element:<Layout/>,
+  errorElement:<ErrorPage/>,
   children:[
     {
       path:'',
-      element:<Home></Home>
+      element:<Home/>
     },
     {
       path:'/problems',
       element:<Problems/>
-    }
+    },
+    {path:'/addproblem',
+      element:<AddProblemForm></AddProblemForm>
+
+    },{
+      path:'/problems/edit/:id',
+      element:<EditProblemForm/>
+    },
+    {
+  path:'*',
+  element:<Notfound/>
+}
+  
   ]
 
 },
 {
   path:'/login',
-  element:<Login/>
+  element:<Login/>,
+  errorElement:<ErrorPage/>
 },
 {
   path:'/signup',
-  element:<Signup/>
+  element:<Signup/>,
+  errorElement:<ErrorPage/>
+},
+{
+  path:'*',
+  element:<Notfound/>
 }
 ]
 )
