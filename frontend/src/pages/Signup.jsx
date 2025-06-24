@@ -32,7 +32,7 @@ function Signup() {
 
     if (res.ok) {
       const data = await res.json();
-      setUser(data);
+      setUser(data.user);
       toast.success(data.msg);
       navigate("/"); 
     } else {
@@ -82,11 +82,7 @@ function Signup() {
           className="w-full p-2 border mb-6 rounded"
           required
         />
-        <label htmlFor="role" className="text-bold text-xl">Select  your Role </label>
-        <select  name="role" value={formData.role} onChange={handleChange} className="p-2 border mb-6 rounded">
-          <option value="user">user</option>
-          <option value="admin">admin</option>
-        </select>
+      
 
         <button
           type="submit"

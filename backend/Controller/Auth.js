@@ -3,12 +3,12 @@ import bcrypt from "bcrypt";
 import generateToken from "../Utils/generatetoken.js";
 
 export const handleusersignup=async(req,resp)=>{
-    const {name,email,password,role}=req.body;
+    const {name,email,password,role='user'}=req.body;
     if(!name||!email||!password||!role){   
        return resp.status(400).json({msg:"Enter all fields with valid credentials"});
     }
    
-     if (password.length < 6) {
+     if (password.length < 6){
       
     return resp.status(400).json({ msg: "Password must be at least 6 characters long" });
   }
@@ -34,7 +34,7 @@ export const handleusersignup=async(req,resp)=>{
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 24 * 60 * 60 * 1000, 
-    }).json({...userWithoutPassword, msg: "User created successfully" });
+    }).json({user:userWithoutPassword, msg: "User created successfully" });
 
 
 }
@@ -55,13 +55,13 @@ export const handleuserlogin=async(req,resp)=>{
     }
     const token = generateToken(user);
     const {password:pw,...userWithoutPassword} = user.toObject();
-    console.log(token);
+   
     resp.status(200).cookie("token", token, {
       httpOnly: true,   
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 24 * 60 * 60 * 1000, 
-    }).json({...userWithoutPassword, msg: "Login successful" });
+    }).json({user:userWithoutPassword, msg: "Login successful" });
 }
 
 export const handleuserlogout=(req,resp)=>{
@@ -72,7 +72,7 @@ export const handleuserlogout=(req,resp)=>{
   });
     return resp.status(200).json({msg:"User logged out successfully"});
 }catch(err){
-  console.error("Logout error:", error);
+  
     return resp.status(500).json({ msg: "Logout failed", error: error.message });
 }
 }

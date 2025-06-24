@@ -7,10 +7,11 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import Problems from './Routes/Problems.js';
 import cors from 'cors';
+import Admin from './Routes/Admin.js'
 dotenv.config();
 
 const app=express();
-
+  
 //connection with mongodb
 const url=process.env.MONGO_URL;
 connectmongodb(url)
@@ -35,6 +36,7 @@ app.use(express.urlencoded({extended:true}));
 app.use('/api/user',UserAuth);
 app.use('/api/user/me',Userprofile);
 app.use('/api/problems',Problems);
+app.use('/api/admin',Admin);
 
 
 app.listen(process.env.port,()=>console.log("server is running "));

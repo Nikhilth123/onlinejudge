@@ -15,6 +15,7 @@ import AddProblemForm  from './pages/AddProblemForm.jsx'
 import EditProblemForm from './pages/EditProblemForm.jsx'
 import Notfound from './pages/Notfound.jsx'
 import ErrorPage from './pages/ErrorPage.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
 
 const router=createBrowserRouter([
   {
@@ -36,6 +37,10 @@ const router=createBrowserRouter([
     },{
       path:'/problems/edit/:id',
       element:<EditProblemForm/>
+    },
+    {
+      path:'/admin/dashboard',
+      element:<AdminDashboard/>
     },
     {
   path:'*',
