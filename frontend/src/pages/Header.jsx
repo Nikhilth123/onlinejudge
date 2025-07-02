@@ -7,7 +7,7 @@ import {toast} from "react-toastify"
 function Header() {
     const {user,setUser}=useContext(Authcontext);
     const navigate=useNavigate();
-   
+   console.log(user);
     const handlelogout=async()=>{
       try{
         const res= await fetch('http://localhost:8000/api/user/logout',{

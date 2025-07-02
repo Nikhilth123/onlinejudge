@@ -1,15 +1,61 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import Editor from "@monaco-editor/react";
+import Split from 'react-split';
+import { useRef } from 'react';
 
 function ProblemDescription() {
   const { id } = useParams();
   const [data, setData] = useState({});
-  const [isDragging, setIsDragging] = useState(false);
-  const [leftWidth, setLeftWidth] = useState(60);
-  const [showTags, setShowTags] = useState(false);
-  const [language, setLanguage] = useState('cpp'); // default language
-  const containerRef = useRef();
+  const [language, setLanguage] = useState('cpp');
+  const [code, setCode] = useState('// Write your code here');
+  const [output, setOutput] = useState('');
+  const [showOutput, setShowOutput] = useState(false);
+  const [isError, setIsError] = useState(false);
+const outputref=useRef(null);
+  const handleRun = async () => {
+    try {
+      const payload = {
+        code,
+        language,
+        input: data.sampleInput
+      };
+
+      const res = await fetch(`http://localhost:5000/api/run`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+      if (!res.ok) {
+        toast.error(result.msg || "Execution error");
+        setOutput(result.error || "An error occurred.");
+        setIsError(true);
+      } else {
+        setOutput(result.output || result.error || "No output");
+        setIsError(!!result.error);
+      }
+      setShowOutput(true);
+      setTimeout(() => {
+  outputref.current?.scrollIntoView({ behavior: 'smooth' });
+}, 100);
+    } catch (err) {
+      console.log(err);
+      toast.error("Execution failed");
+      setOutput("Execution failed: " + (err.message || "Unknown error"));
+      setIsError(true);
+      setShowOutput(true);
+    }
+  };
+
+  const handleClearOutput = () => {
+    setOutput('');
+    setShowOutput(false);
+    setIsError(false);
+  };
 
   const fetchData = async () => {
     try {
@@ -20,12 +66,11 @@ function ProblemDescription() {
       });
 
       const result = await res.json();
-
       if (!res.ok) {
         toast.error(result.msg);
       } else {
         setData(result);
-        toast.success(result.msg);
+        toast.success("Problem loaded");
       }
     } catch (err) {
       toast.error('Failed to fetch problem');
@@ -36,97 +81,113 @@ function ProblemDescription() {
     fetchData();
   }, []);
 
-
-  const startDragging = () => setIsDragging(true);
-  const stopDragging = () => setIsDragging(false);
-  const handleDragging = (e) => {
-    if (!isDragging || !containerRef.current) return;
-    const containerWidth = containerRef.current.getBoundingClientRect().width;
-    const newLeftWidth = (e.clientX / containerWidth) * 100;
-    if (newLeftWidth > 30 && newLeftWidth < 70) setLeftWidth(newLeftWidth);
-  };
-
-  useEffect(() => {
-    window.addEventListener('mousemove', handleDragging);
-    window.addEventListener('mouseup', stopDragging);
-    return () => {
-      window.removeEventListener('mousemove', handleDragging);
-      window.removeEventListener('mouseup', stopDragging);
-    };
-  }, [isDragging]);
-
   return (
-    <div ref={containerRef} className="h-screen flex" style={{ backgroundColor: '#f7f8fc' }}>
-      {/* Left Section: Problem Description */}
-      <div
-        className="overflow-y-auto p-6"
-        style={{ width: `${leftWidth}%`, backgroundColor: '#ffffff' }}
+    <div className="h-screen w-minscreen overflow-hidden">
+      <Split
+        direction="horizontal"
+        sizes={[50, 50]}
+        gutterSize={10}
+        className="w-full h-full flex"
       >
-        <h2 className="text-sm text-gray-500 uppercase mb-2">{data.difficulty}</h2>
-        <h1 className="text-2xl font-bold mb-4">{data.title}</h1>
-        <p className="mb-4 whitespace-pre-wrap">{data.description}</p>
-        <p className="mb-2 whitespace-pre-wrap"><strong>Input Format:</strong> {data.inputFormat}</p>
-        <p className="mb-2 whitespace-pre-wrap"><strong>Output Format:</strong> {data.outputFormat}</p>
-        <p className="mb-2 whitespace-pre-wrap"><strong>Sample Input:</strong> {data.sampleInput}</p>
-        <p className="mb-2 whitespace-pre-wrap"><strong>Sample Output:</strong> {data.sampleOutput}</p>
-        <p className="mb-2 whitespace-pre-wrap"><strong>Constraints:</strong> {data.constraints}</p>
+        {/* Left: Problem Description */}
+        <div className="bg-gray-100 p-4 overflow-auto">
+          <h1 className="text-xl font-bold">{data.title}</h1>
+          <p className="text-sm text-gray-600">{data.difficulty}</p>
 
-        {/* Toggle Tags */}
-        <div className="mt-6">
-          <button
-            onClick={() => setShowTags(!showTags)}
-            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            {showTags ? 'Hide Tags' : 'Show Tags'}
-          </button>
+          <h2 className="font-semibold mt-4">Description</h2>
+          <p className="whitespace-pre-wrap">{data.description}</p>
 
-          {showTags && data.tags && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {data.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="bg-gray-200 px-3 py-1 rounded-full text-sm text-gray-800"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <h2 className="font-semibold mt-4">Input Format</h2>
+          <p>{data.inputFormat}</p>
+
+          <h2 className="font-semibold mt-4">Output Format</h2>
+          <p>{data.outputFormat}</p>
+
+          <h2 className="font-semibold mt-4">Constraints</h2>
+          <p>{data.constraints}</p>
+
+         {data.sampleInputOutput?.map((tc, key) => (
+  <div key={key}>
+    <h2 className="font-semibold mt-4">Sample Input {key + 1}</h2>
+    <pre className="bg-white border p-2 rounded whitespace-pre-wrap">{tc.input}</pre>
+
+    <h2 className="font-semibold mt-4">Sample Output {key + 1}</h2>
+    <pre className="bg-white border p-2 rounded whitespace-pre-wrap">{tc.output}</pre>
+  </div>
+))}
+
+        {/* Right: Editor and Output stacked */}
+        <div className="flex flex-col h-full bg-white border-l border-gray-300">
+          <div className="p-2 flex justify-between items-center border-b">
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="border p-1 rounded"
+            >
+              <option value="cpp">C++</option>
+              <option value="java">Java</option>
+              <option value="py">Python</option>
+              <option value="js">JavaScript</option>
+              <option value="c">C</option>
+            </select>
+            <button
+              className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+              onClick={handleRun}
+            >
+              Run
+            </button>
+          </div>
+
+          {/* Editor */}
+          <div className="flex-grow border-r border-gray-300 overflow-hidden pr-6">
+            <Editor
+              height="100%"
+              language={language}
+              theme="vs-dark"
+              value={code}
+              onChange={(val) => setCode(val)}
+              options={{
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                minimap: { enabled: false },
+                scrollbar: {
+                  horizontal: 'hidden',
+                }
+              }}
+            />
+          </div>
+
+          {/* Output Box below editor */}
+         {showOutput && (
+  <div  ref={outputref} className="bg-gray-50 p-4 border-t border-gray-300">
+    <div className="flex justify-between items-center mb-2">
+      <label className="block text-sm font-medium text-gray-700">
+        Output
+      </label>
+      <button
+        onClick={handleClearOutput}
+        className="text-sm text-red-600 hover:underline"
+      >
+        Clear Output
+      </button>
+    </div>
+    <textarea
+      readOnly
+      value={output}
+      rows={10}
+      className={`w-full p-2 border rounded font-mono text-sm resize-none overflow-auto ${
+        isError
+          ? 'text-red-600 border-red-400 bg-red-50'
+          : 'text-green-700 border-green-400 bg-green-50'
+      }`}
+    />
+  </div>
+)}
+
         </div>
-      </div>
-
-      {/* Divider */}
-      <div
-        onMouseDown={startDragging}
-        className="w-1 bg-gray-300 cursor-col-resize hover:bg-gray-500"
-      />
-
-      {/* Right Section: Code Editor */}
-      <div className="flex-1 p-4 bg-gray-50 flex flex-col">
-        {/* Language Dropdown */}
-        <div className="mb-4 flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Code Editor</h2>
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="px-2 py-1 border rounded bg-white"
-          >
-            <option value="cpp">C++</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-            <option value="javascript">JavaScript</option>
-          </select>
         </div>
-
-        <textarea
-          className="flex-1 p-4 font-mono text-sm resize-none border rounded bg-white outline-none"
-          placeholder={`Write your ${language.toUpperCase()} code here...`}
-        />
-
-        <button className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 self-end">
-          Run Code
-        </button>
-      </div>
+      </Split>
+      
     </div>
   );
 }

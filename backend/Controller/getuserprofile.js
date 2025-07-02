@@ -13,5 +13,7 @@ export const getUserProfile = (req, res) => {
         res.status(200).json({ user: decoded, msg: "User profile retrieved successfully" });
     } catch (err) {
         return res.status(401).json({ msg: "Invalid token" });
+        
     }   
 }
+
