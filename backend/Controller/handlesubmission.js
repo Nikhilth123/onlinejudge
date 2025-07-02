@@ -1,11 +1,11 @@
 import fetch from 'node-fetch';
 import Problem from '../Model/Problemschema';
+import UserSubmissions from '../Model/submission.js'
 
 const handlesubmission= async (req, res) => {
     try {
         const { problemId, userId, code, language } = req.body;
-    
-        // Validate input
+        
         if (!problemId || !userId || !code || !language) {
         return res.status(400).json({ msg: "All fields are required" });
         }
@@ -14,7 +14,7 @@ const handlesubmission= async (req, res) => {
             return res.status(404).json({ msg: "Problem not found" });
         }
       const testCases=data.testCases;
-      const res=await fetch(`http://localhost:8000/api/submit`, {
+      const response=await fetch(`http://localhost:8000/api/submit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -25,16 +25,27 @@ const handlesubmission= async (req, res) => {
                 testCases
             }),
         });
-        if(!res.ok) {
-            const errorData = await res.json();
+        if(!response.ok) {
+            const errorData = await response.json();
             return res.status(res.status).json({ msg: errorData.msg || "Submission failed" });
         }
-        const result = await res.json();
-        
-       
+        const result = await response.json();
+        if (result.error) {
+            return res.status(400).json({ msg: result.error });
+        }
+        const newsubmission=new UserSubmissions({
+            userId:userId,
+            createdAt:Date.now(),
+            problemId:problemId,
+            code:code,
+            language:language,
+            status:result.verdict||result.errorType,
+            error:result.error||'',
+            executionTime:result.executionTime
+        })
 
-
-        res.status(200).json({ msg: "Submission successful", problemId, userId, language });
+        await newsubmission.save();
+        return res.status(200).json(result);
     } catch (error) {
         console.error("Submission error:", error);
         res.status(500).json({ msg: "Internal server error" });

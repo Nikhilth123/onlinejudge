@@ -44,7 +44,7 @@ export const getProblemById = async (req, res) => {
 }
 
 export const addProblem = async (req, res) => {
-  const { title, description, difficulty,tags, sampleInputOutput, inputFormat,outputFormat,constraints } = req.body;
+  const { title, description, difficulty,tags, sampleInput,sampleOutput, inputFormat,outputFormat,constraints } = req.body;
   let testCases=[];
 
   if(req.file){
@@ -74,7 +74,7 @@ export const addProblem = async (req, res) => {
       description, 
       difficulty,
       tags:tags.split(",").map(t=>t.trim()), 
-      sampleInputOutput, inputFormat,outputFormat,constraints,testCases });
+      sampleInput,sampleOutput, inputFormat,outputFormat,constraints,testCases });
 
     await newProblem.save();
     res.status(201).json({msg:"problem created successfully",problem:newProblem});
@@ -95,12 +95,12 @@ export const addProblem = async (req, res) => {
 
 export const updateproblem=async(req, res) => {
     const { id } = req.params;
-    const { title, description, difficulty,tags, sampleInputOutput, inputFormat,outputFormat,constraints,testCases } = req.body;
-    if (!title || !description || !difficulty||!tags||!sampleInputOutput||!inputFormat||!outputFormat||!constraints||!testCases) {
+    const { title, description, difficulty,tags, sampleInput,sampleOutput, inputFormat,outputFormat,constraints,testCases } = req.body;
+    if (!title || !description || !difficulty||!tags||!sampleInput||sampleOutput||!inputFormat||!outputFormat||!constraints||!testCases) {
         return res.status(400).json({ msg: "Please provide all required fields" });
     }
     try {
-        const updatedProblem = await Problem.findByIdAndUpdate(id, { title, description, difficulty,tags, sampleInputOutput, inputFormat,outputFormat,constraints,testCases }, { new: true });
+        const updatedProblem = await Problem.findByIdAndUpdate(id, { title, description, difficulty,tags, sampleInput,sampleOutput, inputFormat,outputFormat,constraints,testCases }, { new: true });
         if (!updatedProblem) {
         return res.status(404).json({ msg: "Problem not found" });
         }

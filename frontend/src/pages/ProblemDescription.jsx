@@ -96,25 +96,23 @@ const outputref=useRef(null);
 
           <h2 className="font-semibold mt-4">Description</h2>
           <p className="whitespace-pre-wrap">{data.description}</p>
-
-          <h2 className="font-semibold mt-4">Input Format</h2>
+         
+          <h2 className="font-semibold mt-4" >Input Format</h2>
           <p>{data.inputFormat}</p>
 
-          <h2 className="font-semibold mt-4">Output Format</h2>
+          <h2 className="font-semibold mt-4" >Output Format</h2>
           <p>{data.outputFormat}</p>
+
 
           <h2 className="font-semibold mt-4">Constraints</h2>
           <p>{data.constraints}</p>
 
-         {data.sampleInputOutput?.map((tc, key) => (
-  <div key={key}>
-    <h2 className="font-semibold mt-4">Sample Input {key + 1}</h2>
-    <pre className="bg-white border p-2 rounded whitespace-pre-wrap">{tc.input}</pre>
+          <h2 className="font-semibold mt-4">Sample Input</h2>
+          <pre className="bg-white border p-2 rounded">{data.sampleInput}</pre>
 
-    <h2 className="font-semibold mt-4">Sample Output {key + 1}</h2>
-    <pre className="bg-white border p-2 rounded whitespace-pre-wrap">{tc.output}</pre>
-  </div>
-))}
+          <h2 className="font-semibold mt-4">Sample Output</h2>
+          <pre className="bg-white border p-2 rounded">{data.sampleOutput}</pre>
+        </div>
 
         {/* Right: Editor and Output stacked */}
         <div className="flex flex-col h-full bg-white border-l border-gray-300">
@@ -185,11 +183,9 @@ const outputref=useRef(null);
 )}
 
         </div>
-        </div>
       </Split>
-      
     </div>
   );
 }
 
-export default ProblemDescription;
+export default ProblemDescription; 

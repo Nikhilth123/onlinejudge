@@ -1,6 +1,7 @@
 import express from 'express';
+import {SetAdmin} from '../Controller/SetAdmin.js';
 const router = express.Router();
-import { SetAdmin } from '../Controller/SetAdmin.js';  
+
 router.put('/setadmin',SetAdmin);
 
 export default router;
