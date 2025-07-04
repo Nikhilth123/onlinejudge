@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import Problems from './Routes/Problems.js';
 import cors from 'cors';
 import Admin from './Routes/Admin.js'
+import submission from './Routes/submission.js';
 dotenv.config();
 
 const app=express();
@@ -37,6 +38,7 @@ app.use('/api/user',UserAuth);
 app.use('/api/user/me',Userprofile);
 app.use('/api/problems',Problems);
 app.use('/api/admin',Admin);
-
+app.use('/api/submission',submission);
+app.use('/api/submit',submission);
 
 app.listen(process.env.port,()=>console.log("server is running "));

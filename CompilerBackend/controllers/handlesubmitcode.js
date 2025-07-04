@@ -1,20 +1,25 @@
-import generateFile from "../generateFile";
-import generateinputfile from "../generateinputfile";
-import executecpp from "../executors/executecpp";
-import executejava from "../executors/executejava";
-import executejavascript from "../executors/executejavascript";
-import executepython from "../executors/executepython";
-import executec from "../executors/executec";
+import generateFile from "../generateFile.js";
+import generateinputfile from "../generateinputfile.js";
+import executecpp from "../executors/executecpp.js";
+import executejava from "../executors/executejava.js";
+import executejavascript from "../executors/executejavascript.js";
+import executepython from "../executors/executepython.js";
+import executec from "../executors/executec.js";
 
 const handlesubmitcode = async (req, res) => {
-    const {testcases,code,language}=req.body;
+    const {testCases,code,language}=req.body;
+    
     if(!code||!language){
         return res.status(401).json({msg:'can be executed',error:'no code or language'})
     }
+    if(!testCases||!Array.isArray(testCases)||testCases.length===0){
+        return res.status(401).json({msg:'can be executed',error:'no testcases provided'})
+    }
     try{
-        const input=`${testcases.length}\n`+testcases.map(tc=>(tc.input.trim())).join('\n');
+      
+        const input=`${testCases.length}\n`+testCases.map(tc=>(tc.input.trim())).join('\n');
         const inputfilepath=generateinputfile(input);
-        const expectedoutput=testcases.map(tc=>(tc.output.trim())).join('\n');
+        const expectedoutput=testCases.map(tc=>(tc.Output.trim())).join('\n');
         const filepath=generateFile(language,code);
         let output='';
             let executiontime;
@@ -53,9 +58,11 @@ const handlesubmitcode = async (req, res) => {
                 break;
         
             }
-
+console.log("expectedLines",expectedoutput);
+console.log("actualLines",output);
             const expectedLines = expectedoutput.trim().split('\n');
 const actualLines = output.trim().split('\n');
+
 
 
 
@@ -66,18 +73,18 @@ for (let i = 0; i < expectedLines.length; i++) {
     return res.status(200).json({
         verdict:'Wrong Answer',
         testcase:i+1,
-        input:testcases[i].input,
+        input:testCases[i].input,
         expectedoutput:expectedLines[i]?.trim(),
         actualoutput:actualLines[i]?.trim(),
-        total:testcases.length(),
+        total:testCases.length,
         time:executiontime
     })
   }
 }
 return res.status(200).json({
 verdict:'Accepted',
-        testcase:testcases.length(),
-        total:testcases.length(),
+        testcase:testCases.length,
+        total:testCases.length,
         time:executiontime
 })
 

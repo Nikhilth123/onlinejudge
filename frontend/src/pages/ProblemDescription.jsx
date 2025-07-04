@@ -13,7 +13,65 @@ function ProblemDescription() {
   const [output, setOutput] = useState('');
   const [showOutput, setShowOutput] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [outputType, setOutputType] = useState(''); 
+  const [submissionResults, setSubmissionResults] = useState([]);
+
+
 const outputref=useRef(null);
+
+const handlesubmit=async()=>{
+  try{
+    const payload={
+      code:code,
+      language:language,
+    }
+    const res=await fetch(`http://localhost:8000/api/submit/${id}`,{
+      method:'POST',
+      credentials:'include',
+      headers:{'Content-Type': 'application/json'},
+      body:JSON.stringify(payload)
+    })
+    
+    if(!res.ok){
+      const result=await res.json();
+      toast.error(result.msg)
+
+    }
+   else {
+    const result=await res.json();
+
+     const formatted = `
+Verdict: ${result.verdict}
+Test Case: ${result.testcase}
+Input:
+${result.input}
+
+Expected Output:
+${result.expectedoutput}
+
+Your Output:
+${result.actualoutput}
+
+Total Test Cases: ${result.total}
+Execution Time: ${result.time} ms
+      `.trim();
+        setOutput(formatted);
+        setIsError(!!result.error);
+      }
+      setShowOutput(true);
+      setTimeout(() => {
+  outputref.current?.scrollIntoView({ behavior: 'smooth' });
+}, 100);
+  }
+  catch(err){
+       console.log(err);
+      toast.error("Execution failed");
+      setOutput("Execution failed: " + (err.message || "Unknown error"));
+      setIsError(true);
+      setShowOutput(true);
+  }
+}
+
   const handleRun = async () => {
     try {
       const payload = {
@@ -34,9 +92,11 @@ const outputref=useRef(null);
         toast.error(result.msg || "Execution error");
         setOutput(result.error || "An error occurred.");
         setIsError(true);
+        setOutputType('run')
       } else {
         setOutput(result.output || result.error || "No output");
         setIsError(!!result.error);
+        setOutputType('run')
       }
       setShowOutput(true);
       setTimeout(() => {
@@ -46,6 +106,7 @@ const outputref=useRef(null);
       console.log(err);
       toast.error("Execution failed");
       setOutput("Execution failed: " + (err.message || "Unknown error"));
+      setOutputType('run')
       setIsError(true);
       setShowOutput(true);
     }
@@ -53,6 +114,7 @@ const outputref=useRef(null);
 
   const handleClearOutput = () => {
     setOutput('');
+    setOutputType('');
     setShowOutput(false);
     setIsError(false);
   };
@@ -80,6 +142,16 @@ const outputref=useRef(null);
   useEffect(() => {
     fetchData();
   }, []);
+   useEffect(() => {
+    const savedCode = localStorage.getItem(`code-${id}`);
+    if (savedCode) {
+      setCode(savedCode);
+    }
+  }, [id]);
+    const handleEditorChange = (value) => {
+    setCode(value);
+    localStorage.setItem(`code-${id}`, value);
+  };
 
   return (
     <div className="h-screen w-minscreen overflow-hidden">
@@ -128,12 +200,20 @@ const outputref=useRef(null);
               <option value="js">JavaScript</option>
               <option value="c">C</option>
             </select>
+            <div>
             <button
               className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
               onClick={handleRun}
             >
               Run
             </button>
+             <button
+              className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 mx-5"
+              onClick={handlesubmit}
+            >
+              submit
+            </button>
+            </div>
           </div>
 
           {/* Editor */}
@@ -143,7 +223,7 @@ const outputref=useRef(null);
               language={language}
               theme="vs-dark"
               value={code}
-              onChange={(val) => setCode(val)}
+              onChange={handleEditorChange }
               options={{
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',

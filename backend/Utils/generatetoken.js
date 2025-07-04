@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import e from 'express';
+import express from 'express';
 dotenv.config();
 
 const generateToken = (user) => {
