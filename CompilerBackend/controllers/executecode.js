@@ -24,29 +24,40 @@ const executecode = async (req, res) => {
     return res.status(401).json({ msg: "write code then submit" });
   }
   try {
-    let output = '';
+    let result = '';
     const filepath = generateFile(language, code);
     const inputfilepath = generateinputfile(input);
     switch (language) {
       case 'cpp':
-        output = await executecpp(filepath, inputfilepath);
+        result = await executecpp(filepath, inputfilepath);
         break;
       case 'py':
-        output = await executepython(filepath, inputfilepath);
+        result = await executepython(filepath, inputfilepath);
         break;
       case 'c':
-        output = await executec(filepath, inputfilepath);
+        result = await executec(filepath, inputfilepath);
         break;
       case 'js':
-        output = await executejavascript(filepath, inputfilepath);
+        result = await executejavascript(filepath, inputfilepath);
         break;
       case 'java':
-        output = await executejava(filepath, inputfilepath);
+        result = await executejava(filepath, inputfilepath);
         break;
 
     }
 
-    return res.status(200).json({ output });
+   if(result.verdict!='Success'){
+    return res.stauts(200).json({
+      verdict:result.verdict,
+      error:result.error,
+      time:result.time
+    })
+   }
+   return res.status(200).json({
+    verdict:'Success',
+    output:result.output.trim(),
+    time:result.time
+   })
 
   }
   catch (err) {

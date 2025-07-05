@@ -7,24 +7,36 @@ const executejava = (filepath, inputfilepath) => {
     const dir = path.dirname(filepath);               // Folder containing Main.java
     const classname = path.basename(filepath, '.java'); // e.g., "Main"
     const compilecmd = `javac "${filepath}"`;
-
+const start=Date.now();
     exec(compilecmd, { shell: true }, (compileErr, _, compileStderr) => {
       if (compileErr) {
-        return reject({
-          type: 'Compilation Error',
+        return resolve({
+          verdict: 'Compilation Error',
           error: compileStderr || compileErr.message,
         });
       }
 
       const runCmd = `java -cp "${dir}" ${classname} < "${inputfilepath}"`;
 
-      exec(runCmd, { shell: true, timeout: 5000 }, (runErr, runStdout, runStderr) => {
+      exec(runCmd, { shell: true, timeout: 2000 }, (runErr, runStdout, runStderr) => {
+        const end=date.now();
+        const time=start-end;
         if (runErr) {
-          return reject({
-            type: 'Runtime Error',
-            error: runStderr || runErr.message,
-          });
-        }
+                if(runErr.killed){
+                return resolve({
+                    verdict:'Time Limit Exceeded',
+                    output:'',
+                    error:runStderr||runErr.message,
+                    time:time,
+                })
+            }
+            return resolve({
+                verdict:'Runtime Error',
+                output:runStdout,
+                error:runStderr||runErr.message,
+                time:time,
+            })
+            }
 
         // Optional: save output to file
         const outputDir = path.join(dir, '..', 'outputs');
@@ -35,7 +47,12 @@ const executejava = (filepath, inputfilepath) => {
         }
         fs.writeFileSync(outputPath, runStdout);
 
-        resolve(runStdout);
+         return resolve({
+                verdict:'Success',
+                output:runStdout,
+                time:time,
+                error:''
+            });
       });
     });
   });

@@ -9,6 +9,7 @@ export const getUserProfile = (req, res) => {
     }
     try {
         const decoded = jwt.verify(token, process.env.secretKey);
+        console.log(decoded)
         
         res.status(200).json({ user: decoded, msg: "User profile retrieved successfully" });
     } catch (err) {

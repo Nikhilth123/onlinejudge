@@ -14,6 +14,8 @@ const usersubmissions = new mongoose.Schema({
     enum: ["Accepted", "Wrong Answer", "Runtime Error", "Compilation Error", "Time Limit Exceeded"],
     default: "Pending",
   },
+  expectedoutput:{type:String},
+  output:{type:String},
   executionTime: Number, 
   error: String, 
   createdAt: { type: Date, default: Date.now },

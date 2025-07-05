@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Editor from "@monaco-editor/react";
 import Split from 'react-split';
 import { useRef } from 'react';
+import Authcontext from '../../context/Authcontext';
+import debounce from 'lodash/debounce';
+
 
 function ProblemDescription() {
   const { id } = useParams();
@@ -13,8 +16,22 @@ function ProblemDescription() {
   const [output, setOutput] = useState('');
   const [showOutput, setShowOutput] = useState(false);
   const [isError, setIsError] = useState(false);
-  const [outputType, setOutputType] = useState(''); 
-  const [submissionResults, setSubmissionResults] = useState([]);
+  const {user}=useContext(Authcontext);
+  const localkey=`code-${user?.id||'guest'}-${id}-${language}`;
+  const saveCode=debounce(async(newcode)=>{
+    localStorage.setItem(localkey,newcode);
+    if(user?.id){
+      const userId=user?.id
+      console.log("userid=",user.id);
+      await fetch(`http://localhost:8000/api/code/savedraft/${id}`,{
+        method:'POST',
+         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ userId, id, language, code: newcode }),
+      })
+    }
+  },2000);
+ 
 
 
 const outputref=useRef(null);
@@ -39,7 +56,16 @@ const handlesubmit=async()=>{
     }
    else {
     const result=await res.json();
+    if(result.verdict!='Wrong Answer'&& result.verdict!='Success'){
+      const formatted=`
+      Verdict: ${result.verdict}
+      time:${result.time}
+      error:${result.error}
 
+      `
+      setOutput(formatted);
+    }
+else{
      const formatted = `
 Verdict: ${result.verdict}
 Test Case: ${result.testcase}
@@ -50,7 +76,7 @@ Expected Output:
 ${result.expectedoutput}
 
 Your Output:
-${result.actualoutput}
+${result.output}
 
 Total Test Cases: ${result.total}
 Execution Time: ${result.time} ms
@@ -58,11 +84,13 @@ Execution Time: ${result.time} ms
         setOutput(formatted);
         setIsError(!!result.error);
       }
+    
       setShowOutput(true);
       setTimeout(() => {
   outputref.current?.scrollIntoView({ behavior: 'smooth' });
 }, 100);
   }
+}
   catch(err){
        console.log(err);
       toast.error("Execution failed");
@@ -92,11 +120,11 @@ Execution Time: ${result.time} ms
         toast.error(result.msg || "Execution error");
         setOutput(result.error || "An error occurred.");
         setIsError(true);
-        setOutputType('run')
+        
       } else {
         setOutput(result.output || result.error || "No output");
         setIsError(!!result.error);
-        setOutputType('run')
+        
       }
       setShowOutput(true);
       setTimeout(() => {
@@ -106,7 +134,7 @@ Execution Time: ${result.time} ms
       console.log(err);
       toast.error("Execution failed");
       setOutput("Execution failed: " + (err.message || "Unknown error"));
-      setOutputType('run')
+     
       setIsError(true);
       setShowOutput(true);
     }
@@ -114,7 +142,7 @@ Execution Time: ${result.time} ms
 
   const handleClearOutput = () => {
     setOutput('');
-    setOutputType('');
+   
     setShowOutput(false);
     setIsError(false);
   };
@@ -142,16 +170,35 @@ Execution Time: ${result.time} ms
   useEffect(() => {
     fetchData();
   }, []);
-   useEffect(() => {
-    const savedCode = localStorage.getItem(`code-${id}`);
-    if (savedCode) {
-      setCode(savedCode);
-    }
-  }, [id]);
+  
+   
     const handleEditorChange = (value) => {
     setCode(value);
-    localStorage.setItem(`code-${id}`, value);
+  saveCode(value);
   };
+
+   useEffect(() => {
+    const loadDraft = async () => {
+      const local = localStorage.getItem(localkey);
+      setCode(local || '');
+
+      if (user?.id) {
+        const userId=user?.id
+        const res = await fetch(`http://localhost:8000/api/code/getdraft/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({userId , id, language }),
+        });
+        const data = await res.json();
+        if (data.code) {
+          setCode(data.code);
+          localStorage.setItem(localkey, data.code); // Sync local
+        }
+      }
+    };
+    loadDraft();
+  }, [user, id, language]);
 
   return (
     <div className="h-screen w-minscreen overflow-hidden">

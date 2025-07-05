@@ -10,13 +10,28 @@ const executepython=(filepath,inputfilepath)=>{
    
         const runcmd=`python3 "${filepath}" < "${inputfilepath}"`
         exec(runcmd,{shell:true,timeout:2000},(runerr,runstdout,runstderr)=>{
-            if(runerr){
-                return reject({
-                    type:'Runtime error',
-                    error:runstderr||runerr.message
+           if(runerr){
+                if(runerr.killed){
+                return resolve({
+                    verdict:'Time Limit Exceeded',
+                    output:'',
+                    error:runstderr||runerr.message,
+                    time:time,
                 })
             }
-            resolve(runstdout);
+            return resolve({
+                verdict:'Runtime Error',
+                output:runstdout,
+                error:runstderr||runerr.message,
+                time:time,
+            })
+            }
+            return resolve({
+                verdict:'Success',
+                output:runstdout,
+                time:time,
+                error:''
+            });
         })
     })
 

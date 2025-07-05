@@ -8,12 +8,27 @@ const executejavascript=(filepath,inputfilepath)=>{
         const runcmd=`node "${filepath}" < "${inputfilepath}"`
         exec(runcmd,{shell:true,timeout:2000},(runerr,runstdout,runstderr)=>{
             if(runerr){
-                return reject({
-                    type:'Runtime error',
-                    error:runerr.message||runstderr
+                if(runerr.killed){
+                return resolve({
+                    verdict:'Time Limit Exceeded',
+                    output:'',
+                    error:runstderr||runerr.message,
+                    time:time,
                 })
             }
-            resolve(runstdout);
+            return resolve({
+                verdict:'Runtime Error',
+                output:runstdout,
+                error:runstderr||runerr.message,
+                time:time,
+            })
+            }
+            return resolve({
+                verdict:'Success',
+                output:runstdout,
+                time:time,
+                error:''
+            });
         })
     })
 

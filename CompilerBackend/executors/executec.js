@@ -5,35 +5,55 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const diroutput=path.join(__dirname,'..',"outputs");  
+const diroutput=path.join(__dirname, '..',"outputs");  
 
 if(!fs.existsSync(diroutput)){
     fs.mkdirSync(diroutput, { recursive: true });
 }
 
-const executec=(filepath,inputfilepath)=>{
+const executecpp=(filepath,inputfilepath)=>{
     return new Promise((resolve,reject)=>{
     const jobid = path.basename(filepath).split('.')[0];
     const outputfile=path.join(diroutput,`${jobid}.out`);
     const compilecmd=`gcc "${filepath}" -o "${outputfile}"`;
+    const start=Date.now();
     exec(compilecmd,{shell:true},(compileerr,_,compilestderr)=>{
         if(compileerr){
-            return reject({
-                type:'compilation error',
-                error:compilestderr||compileerr.message
+            return resolve({
+                verdict:'Compilation Error',
+                output:'',
+                error:compilestderr||compileerr.message,
+                time:0
             });
         }
         const runcmd=`"${outputfile}" < "${inputfilepath}"`
         exec(runcmd,{shell:true,timeout:2000},(runerr,runstdout,runstderr)=>{
+            const end=Date.now();
+            const time=end-start;
             if(runerr){
-                return reject({
-                    type:'Runtime error',
-                    error:runerr.message||runstderr
+                if(runerr.killed){
+                return resolve({
+                    verdict:'Time Limit Exceeded',
+                    output:'',
+                    error:runstderr||runerr.message,
+                    time:time,
                 })
             }
-            resolve(runstdout);
+            return resolve({
+                verdict:'Runtime Error',
+                output:runstdout,
+                error:runstderr||runerr.message,
+                time:time,
+            })
+            }
+            return resolve({
+                verdict:'Success',
+                output:runstdout,
+                time:time,
+                error:''
+            });
         })
     })
 })
 }
-export default executec;
+export default executecpp;

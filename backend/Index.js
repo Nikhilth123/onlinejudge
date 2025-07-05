@@ -9,6 +9,7 @@ import Problems from './Routes/Problems.js';
 import cors from 'cors';
 import Admin from './Routes/Admin.js'
 import submission from './Routes/submission.js';
+import SaveDraft from './Routes/SaveDraft.js'
 dotenv.config();
 
 const app=express();
@@ -40,5 +41,7 @@ app.use('/api/problems',Problems);
 app.use('/api/admin',Admin);
 app.use('/api/submission',submission);
 app.use('/api/submit',submission);
+app.use('/api/code',SaveDraft);
+
 
 app.listen(process.env.port,()=>console.log("server is running "));

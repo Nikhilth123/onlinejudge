@@ -16,22 +16,42 @@ const executecpp=(filepath,inputfilepath)=>{
     const jobid = path.basename(filepath).split('.')[0];
     const outputfile=path.join(diroutput,`${jobid}.out`);
     const compilecmd=`g++ "${filepath}" -o "${outputfile}"`;
+    const start=Date.now();
     exec(compilecmd,{shell:true},(compileerr,_,compilestderr)=>{
         if(compileerr){
             return reject({
-                type:'compilation error',
-                error:compilestderr||compileerr.message
+                verdict:'Compilation Error',
+                output:'',
+                error:compilestderr||compileerr.message,
+                time:0
             });
         }
         const runcmd=`"${outputfile}" < "${inputfilepath}"`
         exec(runcmd,{shell:true,timeout:2000},(runerr,runstdout,runstderr)=>{
+            const end=Date.now();
+            const time=end-start;
             if(runerr){
-                return reject({
-                    type:'Runtime error',
-                    error:runstderr||runerr.message
+                if(runerr.killed){
+                return resolve({
+                    verdict:'Time Limit Exceeded',
+                    output:'',
+                    error:runstderr||runerr.message,
+                    time:time,
                 })
             }
-            resolve(runstdout);
+            return resolve({
+                verdict:'Runtime Error',
+                output:runstdout.trim(),
+                error:runstderr||runerr.message,
+                time:time,
+            })
+            }
+            return resolve({
+                verdict:'Success',
+                output:runstdout.trim(),
+                time:time,
+                error:''
+            });
         })
     })
 })

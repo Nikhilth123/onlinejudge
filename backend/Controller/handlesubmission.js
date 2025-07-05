@@ -36,10 +36,7 @@
                 return res.status(res.status).json({ msg: errorData.msg || "Submission failed" });
             }
             const result = await response.json();
-            if (result.error) {
-                console.log("Submission error:", result.error); 
-                return res.status(400).json({ msg: result.error });
-            }
+           
             const newsubmission = new UserSubmissions({
                 userId: userId,
                 createdAt: Date.now(),
@@ -47,8 +44,10 @@
                 code: code,
                 language: language,
                 status: result.verdict || result.errorType,
+                expectedoutput:result.expectedoutput,
+                output:result.output,
                 error: result.error || '',
-                executionTime: result.executionTime
+                executionTime: result.time
             })
 
             await newsubmission.save();
