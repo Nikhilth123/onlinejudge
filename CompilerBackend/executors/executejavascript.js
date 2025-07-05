@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
-
+import formatjavascripterror from '../formaterrors/formatjavascripterror.js';
 
 const executejavascript=(filepath,inputfilepath)=>{
     return new Promise((resolve,reject)=>{
@@ -12,14 +12,14 @@ const executejavascript=(filepath,inputfilepath)=>{
                 return resolve({
                     verdict:'Time Limit Exceeded',
                     output:'',
-                    error:runstderr||runerr.message,
+                    error:'Time Limit Exceeded',
                     time:time,
                 })
             }
             return resolve({
                 verdict:'Runtime Error',
                 output:runstdout,
-                error:runstderr||runerr.message,
+                error:formatjavascripterror(runstderr||runerr.message),
                 time:time,
             })
             }

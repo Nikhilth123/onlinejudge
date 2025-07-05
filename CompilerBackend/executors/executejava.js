@@ -1,6 +1,7 @@
 import { exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
+import formatjavaerror from '../formaterrors/formatjavaerror.js';
 
 const executejava = (filepath, inputfilepath) => {
   return new Promise((resolve, reject) => {
@@ -12,7 +13,7 @@ const start=Date.now();
       if (compileErr) {
         return resolve({
           verdict: 'Compilation Error',
-          error: compileStderr || compileErr.message,
+          error: formatjavaerror(compileStderr || compileErr.message),
         });
       }
 
@@ -26,14 +27,14 @@ const start=Date.now();
                 return resolve({
                     verdict:'Time Limit Exceeded',
                     output:'',
-                    error:runStderr||runErr.message,
+                    error:'Time Limit Exceeded',
                     time:time,
                 })
             }
             return resolve({
                 verdict:'Runtime Error',
                 output:runStdout,
-                error:runStderr||runErr.message,
+                error:formatjavaerror(runStderr||runErr.message),
                 time:time,
             })
             }

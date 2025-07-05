@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
+import formatcpperror from '../formaterrors/formatcpperror.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,10 +20,10 @@ const executecpp=(filepath,inputfilepath)=>{
     const start=Date.now();
     exec(compilecmd,{shell:true},(compileerr,_,compilestderr)=>{
         if(compileerr){
-            return reject({
+            return resolve({
                 verdict:'Compilation Error',
                 output:'',
-                error:compilestderr||compileerr.message,
+                error:formatcpperror(compilestderr||compileerr.message),
                 time:0
             });
         }
@@ -35,14 +36,14 @@ const executecpp=(filepath,inputfilepath)=>{
                 return resolve({
                     verdict:'Time Limit Exceeded',
                     output:'',
-                    error:runstderr||runerr.message,
+                    error:'Time Limit Exceeded',
                     time:time,
                 })
             }
             return resolve({
                 verdict:'Runtime Error',
                 output:runstdout.trim(),
-                error:runstderr||runerr.message,
+                error:formatcpperror(runstderr||runerr.message),
                 time:time,
             })
             }
