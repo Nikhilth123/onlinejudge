@@ -51,7 +51,8 @@ const handlesubmit=async()=>{
     
     if(!res.ok){
       const result=await res.json();
-      toast.error(result.msg)
+      setOutput("Server Error Try again");
+      setIsError(true);
 
     }
    else {
@@ -64,6 +65,7 @@ const handlesubmit=async()=>{
 
       `
       setOutput(formatted);
+      setIsError(true);
     }
 else{
      const formatted = `
@@ -82,7 +84,9 @@ Total Test Cases: ${result.total}
 Execution Time: ${result.time} ms
       `.trim();
         setOutput(formatted);
-        setIsError(!!result.error);
+        if(result.verdict=='Wrong Answer')
+        setIsError(true);
+      else setIsError(false);
       }
     
       setShowOutput(true);

@@ -1,0 +1,1 @@
+Maximum sum of two elements (sorted approach): 74

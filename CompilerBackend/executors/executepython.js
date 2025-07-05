@@ -9,7 +9,10 @@ const executepython=(filepath,inputfilepath)=>{
     return new Promise((resolve,reject)=>{
    
         const runcmd=`python3 "${filepath}" < "${inputfilepath}"`
+        const start=Date.now();
         exec(runcmd,{shell:true,timeout:2000},(runerr,runstdout,runstderr)=>{
+            const end=Date.now();
+            const time=end-start;
            if(runerr){
                 if(runerr.killed){
                 return resolve({

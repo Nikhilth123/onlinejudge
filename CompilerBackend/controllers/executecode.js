@@ -47,7 +47,7 @@ const executecode = async (req, res) => {
     }
 
    if(result.verdict!='Success'){
-    return res.stauts(200).json({
+    return res.status(200).json({
       verdict:result.verdict,
       error:result.error,
       time:result.time

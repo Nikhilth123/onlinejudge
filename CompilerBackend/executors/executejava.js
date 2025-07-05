@@ -20,7 +20,7 @@ const start=Date.now();
       const runCmd = `java -cp "${dir}" ${classname} < "${inputfilepath}"`;
 
       exec(runCmd, { shell: true, timeout: 2000 }, (runErr, runStdout, runStderr) => {
-        const end=date.now();
+        const end=Date.now();
         const time=start-end;
         if (runErr) {
                 if(runErr.killed){
