@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Editor from "@monaco-editor/react";
 import Split from 'react-split';
@@ -203,6 +203,11 @@ Execution Time: ${result.time} ms
     };
     loadDraft();
   }, [user, id, language]);
+  const navigate=useNavigate();
+
+  const handlesubmission=()=>{
+    navigate(`/submission/${id}`)
+  }
 
   return (
     <div className="h-screen w-minscreen overflow-hidden">
@@ -214,6 +219,9 @@ Execution Time: ${result.time} ms
       >
         {/* Left: Problem Description */}
         <div className="bg-gray-100 p-4 overflow-auto">
+          {user&&(
+          <button onClick={handlesubmission}>submission</button>
+)}
           <h1 className="text-xl font-bold">{data.title}</h1>
           <p className="text-sm text-gray-600">{data.difficulty}</p>
 

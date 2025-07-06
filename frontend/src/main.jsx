@@ -17,6 +17,8 @@ import Notfound from './pages/Notfound.jsx'
 import ErrorPage from './pages/ErrorPage.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import ProblemDescription from './pages/ProblemDescription.jsx'
+import Submission from './pages/Submission.jsx'
+import SubmissionDescription from './pages/SubmissionDescription.jsx'
 
 const router=createBrowserRouter([
   {
@@ -45,6 +47,12 @@ const router=createBrowserRouter([
     },{
       path:'/problems/:id',
       element:<ProblemDescription/>
+    },{
+      path:'/submission/:id',
+      element:<Submission></Submission>
+    },{
+      path:'/submission/code/:id',
+      element:<SubmissionDescription></SubmissionDescription>
     },
     {
   path:'*',

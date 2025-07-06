@@ -37,7 +37,7 @@ function Problems() {
   
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="p-4 w-4xl mx-auto flex-col items-center justify-center">
       <h2 className="text-2xl font-bold mb-6">All Problems</h2>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6 ">
@@ -65,7 +65,7 @@ function Problems() {
     {problemData.map((problem) => (
   <div
     key={problem._id}
-    className="flex items-center justify-between bg-gray-100 hover:bg-gray-700  hover:text-white text-gray-800 px-4 py-3 rounded-md mb-3 transition duration-200"
+    className="flex items-center justify-between bg-gray-100 hover:bg-gray-700  hover:text-white text-gray-800 px-4 py-3 rounded-md mb-3 transition duration-200 "
   >
     <Link to={`/problems/${problem._id}`} className="flex-grow text-left">
       {problem.title}

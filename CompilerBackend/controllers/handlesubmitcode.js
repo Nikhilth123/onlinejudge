@@ -79,6 +79,7 @@ for (let i = 0; i < expectedLines.length; i++) {
   const actual=actualLines[i]?.trim();
   const expected=expectedLines[i]?.trim();
   if(expected!=actual){
+    console.log("my",testCases[i].input);
     return res.status(200).json({
         verdict:'Wrong Answer',
         testcase:i+1,

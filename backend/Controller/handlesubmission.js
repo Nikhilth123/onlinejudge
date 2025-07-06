@@ -8,6 +8,8 @@
             const {id} = req.user;
             const userId = id; 
             const {code, language } = req.body;
+            console.log("problemid",problemId);
+            console.log("userid",id);
            
 
             if (!problemId || !userId || !code || !language) {
@@ -49,13 +51,13 @@
                 error: result.error || '',
                 executionTime: result.time
             })
-
-            await newsubmission.save();
-            console.log("result",result);
+               
+           await newsubmission.save();
+                
             return res.status(200).json(result);
         } catch (error) {
             console.error("Submission error:", error);
-            res.status(500).json({ msg: "Internal server error" });
+            res.status(500).json({ msg: "Internal server error",err });
         }
     }
     export default handlesubmission;
