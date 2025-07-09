@@ -7,7 +7,6 @@ import { useRef } from 'react';
 import Authcontext from '../../context/Authcontext';
 import debounce from 'lodash/debounce';
 
-
 function ProblemDescription() {
   const { id } = useParams();
   const [data, setData] = useState({});
@@ -16,8 +15,53 @@ function ProblemDescription() {
   const [output, setOutput] = useState('');
   const [showOutput, setShowOutput] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [error,seterror]=useState('')
+  const [airesponse,setairesponse]=useState('');
   const {user}=useContext(Authcontext);
   const localkey=`code-${user?.id||'guest'}-${id}-${language}`;
+
+
+  const handleairesponse=async(task)=>{
+    const payload={
+      language:language,
+      code:code,
+      question:data.description+data.inputFormat,
+      error:error,
+      task:task
+    }
+    try{
+      const res=await fetch(`http://localhost:5000/api/ai/help`,{
+        method:'POST',
+       headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify(payload)
+      })
+      if(!res.ok){
+         const result=await res.json()
+        console.log("error in fetching try again",result.error)
+
+      }
+      else{
+      const result=await res.json()
+      console.log(result)
+      setairesponse(result)
+      }
+
+    }
+    catch(err){
+      console.log(err);
+
+    }
+    
+
+  }
+
+
+
+
+
+
+
+
   const saveCode=debounce(async(newcode)=>{
     localStorage.setItem(localkey,newcode);
     if(user?.id){
@@ -65,6 +109,7 @@ const handlesubmit=async()=>{
 
       `
       setOutput(formatted);
+      if(result.verdict!='Wrong Answer')seterror(result.error)
       setIsError(true);
     }
 else{
@@ -197,9 +242,11 @@ Execution Time: ${result.time} ms
         const data = await res.json();
         if (data.code) {
           setCode(data.code);
-          localStorage.setItem(localkey, data.code); // Sync local
+          localStorage.setItem(localkey, data.code); 
+          return;
         }
       }
+      setCode(local||'')
     };
     loadDraft();
   }, [user, id, language]);
@@ -218,15 +265,32 @@ Execution Time: ${result.time} ms
         className="w-full h-full flex"
       >
         {/* Left: Problem Description */}
-        <div className="bg-gray-100 p-4 overflow-auto">
-          {user&&(
-          <button onClick={handlesubmission}>submission</button>
+        <div className="bg-gray-100  overflow-auto">
+            {user&&(
+          <button onClick={handlesubmission} className='bg-red-400 px-2 py-2 rounded mx-5 border-1'>submission</button>
 )}
+        <select
+         onChange={(e)=>{handleairesponse(e.target.value)}}
+        className="border p-2 rounded  bg-gray-400 mx-4"
+        
+        defaultValue=""
+        >
+          <option value=''disabled>TakeAiHelp</option>
+          {!code?.trim() && (
+  <option value='boilerplate'>boilerplate</option>
+)}
+          <option value='code optimization'>codeoptimize</option>
+          <option value='codeexplanation'>codeexplanation</option>
+        </select>
+        <div className="bg-gray-100 p-4 overflow-auto">
+        
           <h1 className="text-xl font-bold">{data.title}</h1>
           <p className="text-sm text-gray-600">{data.difficulty}</p>
 
           <h2 className="font-semibold mt-4">Description</h2>
+
           <p className="whitespace-pre-wrap">{data.description}</p>
+          <button className='bg-amber-300 px-3 py-2 rounded' onClick={()=>handleairesponse('hints')}>AskHints</button>
          
           <h2 className="font-semibold mt-4" >Input Format</h2>
           <p>{data.inputFormat}</p>
@@ -244,6 +308,23 @@ Execution Time: ${result.time} ms
           <h2 className="font-semibold mt-4">Sample Output</h2>
           <pre className="bg-white border p-2 rounded">{data.sampleOutput}</pre>
         </div>
+
+        {/*ai response*/}
+          {airesponse && (
+  <div className='bg-slate-100 my-2 p-3 rounded border'>
+    <h3 className="font-bold">AI Help:</h3>
+    <textarea
+  value={airesponse}
+  readOnly
+  rows={50}
+  className="w-full p-2 border rounded bg-white text-sm font-mono resize-y overflow-auto"
+/>
+  </div>
+)}
+
+
+        </div>
+
 
         {/* Right: Editor and Output stacked */}
         <div className="flex flex-col h-full bg-white border-l border-gray-300">
@@ -278,7 +359,7 @@ Execution Time: ${result.time} ms
           {/* Editor */}
           <div className="flex-grow border-r border-gray-300 overflow-hidden pr-6">
             <Editor
-              height="100%"
+              height="90%"
               language={language}
               theme="vs-dark"
               value={code}
@@ -301,6 +382,9 @@ Execution Time: ${result.time} ms
       <label className="block text-sm font-medium text-gray-700">
         Output
       </label>
+      <button className='text-sm text-red-600 hover:underline mx-3'
+      onClick={()=>handleairesponse('whyerror')}
+      >whyerror</button>
       <button
         onClick={handleClearOutput}
         className="text-sm text-red-600 hover:underline"
