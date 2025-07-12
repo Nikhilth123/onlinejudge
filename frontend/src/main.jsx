@@ -19,6 +19,7 @@ import AdminDashboard from './pages/AdminDashboard.jsx'
 import ProblemDescription from './pages/ProblemDescription.jsx'
 import Submission from './pages/Submission.jsx'
 import SubmissionDescription from './pages/SubmissionDescription.jsx'
+import UserProfile from './pages/UserProfile.jsx'
 
 const router=createBrowserRouter([
   {
@@ -53,6 +54,11 @@ const router=createBrowserRouter([
     },{
       path:'/submission/code/:id',
       element:<SubmissionDescription></SubmissionDescription>
+    },
+    {
+      path:'/profile/:id',
+      element:<UserProfile></UserProfile>
+
     },
     {
   path:'*',

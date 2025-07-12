@@ -14,6 +14,31 @@ function Problems() {
   const [page,setPage]=useState(1);
   const [totalpages,settotalpages]=useState(1);
 
+  const handledeleteproblem=async(problemid)=>{
+    try{
+      const res=fetch(`http://localhost:8000/api/problems/delete/${problemid}`,{
+        method:'Delete',
+        credentials:'include'
+      })
+      if(!res.ok){
+        const result=await res.json();
+        console.log(result);
+        toast.error('problem not deleted successfully')
+      }
+      else{
+         const result=await res.json();
+         toast.success('problem deleted successfully');
+
+      }
+    }
+    catch(err){
+      console.log(err)
+      console.log('server error');
+      toast.error('server error try again');
+    }
+
+  }
+
   const fetchProblem = async () => {
 
     
@@ -77,6 +102,14 @@ function Problems() {
       className="ml-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
     >
       Edit
+    </button>
+   )}
+    {user&&user.role=='admin'&&(
+    <button
+      onClick={()=>handledeleteproblem(problem._id)}
+      className="ml-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+    >
+      Delete
     </button>
    )}
     

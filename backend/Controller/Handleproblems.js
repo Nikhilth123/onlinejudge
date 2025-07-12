@@ -112,6 +112,7 @@ export const updateproblem=async(req, res) => {
 
 export const deleteproblem=async(req,res)=>{
     const id=req.params;
+    console.log("hello user",id);
     try {
         const deletedProblem = await Problem.findByIdAndDelete(id);
         if (!deletedProblem) {

@@ -10,7 +10,7 @@ import cors from 'cors';
 import Admin from './Routes/Admin.js'
 import submission from './Routes/submission.js';
 import SaveDraft from './Routes/SaveDraft.js';
-
+import uploadprofilepic from './Routes/uploadprofilepic.js'
 
 dotenv.config();
 
@@ -44,6 +44,7 @@ app.use('/api/admin',Admin);
 app.use('/api/submission',submission);
 app.use('/api/submit',submission);
 app.use('/api/code',SaveDraft);
+app.use('api/profile',uploadprofilepic)
 
 
 app.listen(process.env.port,()=>console.log("server is running "));

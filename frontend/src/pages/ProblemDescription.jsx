@@ -18,10 +18,13 @@ function ProblemDescription() {
   const [error,seterror]=useState('')
   const [airesponse,setairesponse]=useState('');
   const {user}=useContext(Authcontext);
+  const [loading,setloading]=useState(false);
   const localkey=`code-${user?.id||'guest'}-${id}-${language}`;
 
 
   const handleairesponse=async(task)=>{
+    if(loading)return;
+    setloading(true);
     const payload={
       language:language,
       code:code,
@@ -51,7 +54,7 @@ function ProblemDescription() {
       console.log(err);
 
     }
-    
+    setloading(false);
 
   }
 
@@ -81,6 +84,8 @@ function ProblemDescription() {
 const outputref=useRef(null);
 
 const handlesubmit=async()=>{
+  if(loading)return ;
+  setloading(true);
   try{
     const payload={
       code:code,
@@ -147,9 +152,12 @@ Execution Time: ${result.time} ms
       setIsError(true);
       setShowOutput(true);
   }
+  setloading(false)
 }
 
   const handleRun = async () => {
+    if(loading)return;
+    setloading(true);
     try {
       const payload = {
         code,
@@ -171,7 +179,14 @@ Execution Time: ${result.time} ms
         setIsError(true);
         
       } else {
-        setOutput(result.output || result.error || "No output");
+        const formatted= `
+ ${result.verdict}
+${result.error? result.error:''}
+Output:
+${result.output}
+Execution Time: ${result.time} ms
+      `.trim();
+        setOutput(formatted);
         setIsError(!!result.error);
         
       }
@@ -187,6 +202,7 @@ Execution Time: ${result.time} ms
       setIsError(true);
       setShowOutput(true);
     }
+    setloading(false);
   };
 
   const handleClearOutput = () => {
@@ -272,10 +288,11 @@ Execution Time: ${result.time} ms
         <select
          onChange={(e)=>{handleairesponse(e.target.value)}}
         className="border p-2 rounded  bg-gray-400 mx-4"
+        disabled={loading}
         
         defaultValue=""
         >
-          <option value=''disabled>TakeAiHelp</option>
+          <option value=''disabled>{loading?'Loading...':'TakeAiHelp'}</option>
           {!code?.trim() && (
   <option value='boilerplate'>boilerplate</option>
 )}
@@ -290,7 +307,7 @@ Execution Time: ${result.time} ms
           <h2 className="font-semibold mt-4">Description</h2>
 
           <p className="whitespace-pre-wrap">{data.description}</p>
-          <button className='bg-amber-300 px-3 py-2 rounded' onClick={()=>handleairesponse('hints')}>AskHints</button>
+          <button className='bg-amber-300 px-3 py-2 rounded' disabled={loading}onClick={()=>handleairesponse('hints')}>{loading?'Loading...':'AskHints'}</button>
          
           <h2 className="font-semibold mt-4" >Input Format</h2>
           <p>{data.inputFormat}</p>
@@ -344,14 +361,16 @@ Execution Time: ${result.time} ms
             <button
               className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
               onClick={handleRun}
+              disabled={loading}
             >
-              Run
+             {loading?'Loading...':'Run'} 
             </button>
              <button
               className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 mx-5"
               onClick={handlesubmit}
+              disabled={loading}
             >
-              submit
+               {loading?'Loading...':'Submit'} 
             </button>
             </div>
           </div>
@@ -382,9 +401,9 @@ Execution Time: ${result.time} ms
       <label className="block text-sm font-medium text-gray-700">
         Output
       </label>
-      <button className='text-sm text-red-600 hover:underline mx-3'
+      <button disabled={loading}className='text-sm text-red-600 hover:underline mx-3'
       onClick={()=>handleairesponse('whyerror')}
-      >whyerror</button>
+      >{loading?'Loading...':'whyerror'}</button>
       <button
         onClick={handleClearOutput}
         className="text-sm text-red-600 hover:underline"
