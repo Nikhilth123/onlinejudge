@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
-import formatpythonerror from '../formaterrors/formatpythonerror';
+import formatpythonerror from '../formaterrors/formatpythonerror.js';
 
 
 

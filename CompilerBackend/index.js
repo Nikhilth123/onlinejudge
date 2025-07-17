@@ -3,6 +3,7 @@ import runcode from './routes/runcode.js';
 import cors from 'cors';
 import submitcode from './routes/submitcode.js'
 import ai from './routes/ai.js'
+import './cronecleaner.js'; 
 
 const app = express();
 app.use(cors({

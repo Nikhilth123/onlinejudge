@@ -5,8 +5,8 @@ import formatjavaerror from '../formaterrors/formatjavaerror.js';
 
 const executejava = (filepath, inputfilepath) => {
   return new Promise((resolve, reject) => {
-    const dir = path.dirname(filepath);               // Folder containing Main.java
-    const classname = path.basename(filepath, '.java'); // e.g., "Main"
+    const dir = path.dirname(filepath);              
+    const classname = path.basename(filepath, '.java'); 
     const compilecmd = `javac "${filepath}"`;
 const start=Date.now();
     exec(compilecmd, { shell: true }, (compileErr, _, compileStderr) => {
@@ -39,14 +39,7 @@ const start=Date.now();
             })
             }
 
-        // Optional: save output to file
-        const outputDir = path.join(dir, '..', 'outputs');
-        const jobId = path.basename(dir); // the UUID
-        const outputPath = path.join(outputDir, `${jobId}.txt`);
-        if (!fs.existsSync(outputDir)) {
-          fs.mkdirSync(outputDir, { recursive: true });
-        }
-        fs.writeFileSync(outputPath, runStdout);
+       
 
          return resolve({
                 verdict:'Success',

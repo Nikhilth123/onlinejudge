@@ -12,7 +12,7 @@ if(!fs.existsSync(diroutput)){
     fs.mkdirSync(diroutput, { recursive: true });
 }
 
-const executecpp=(filepath,inputfilepath)=>{
+const executec=(filepath,inputfilepath)=>{
     return new Promise((resolve,reject)=>{
     const jobid = path.basename(filepath).split('.')[0];
     const outputfile=path.join(diroutput,`${jobid}.out`);
@@ -57,4 +57,4 @@ const executecpp=(filepath,inputfilepath)=>{
     })
 })
 }
-export default executecpp;
+export default executec;

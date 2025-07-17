@@ -1,63 +1,50 @@
-import React from 'react';
+import React, { useState } from "react";
 
-const UserProfile = ({ user }) => {
-  const solved = user?.questionsSolved;
-  const total = user?.totalQuestions;
-  const solvedPercent = Math.min((solved / total) * 100, 100);
+export default function ProfilePage() {
+  const [profilePic, setProfilePic] = useState(null);
+  const [totalQuestions, setTotalQuestions] = useState(100); // replace with actual
+  const [solvedQuestions, setSolvedQuestions] = useState(45); // replace with actual
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setProfilePic(imageUrl);
+      // You can upload this image to backend here
+    }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 mt-8 bg-white rounded-xl shadow-md flex flex-row gap-8">
-      {/* Left - Profile Picture */}
-      <div className="w-1/3 bg-gray-100 rounded-xl p-4 flex justify-center items-start">
-        <img
-          src={user?.profilePic || "/default-avatar.png"}
-          alt="Profile"
-          className="w-32 h-32 rounded-xl object-cover border"
-        />
-      </div>
-
-      {/* Right - Stats */}
-      <div className="w-2/3 grid grid-cols-2 gap-6">
-        {/* Question Solved - Circle */}
-        <div className="flex flex-col items-center justify-center bg-green-100 rounded-xl p-6">
-          <div className="relative w-32 h-32">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-              <path
-                className="text-gray-300"
-                stroke="currentColor"
-                strokeWidth="3.8"
-                fill="none"
-                d="M18 2.0845
-                   a 15.9155 15.9155 0 0 1 0 31.831
-                   a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-              <path
-                className="text-green-600"
-                stroke="currentColor"
-                strokeWidth="3.8"
-                strokeDasharray={`${solvedPercent}, 100`}
-                fill="none"
-                d="M18 2.0845
-                   a 15.9155 15.9155 0 0 1 0 31.831
-                   a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-center text-green-700 font-semibold">
-              {solved} Solved
-            </div>
-          </div>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="bg-white p-6 rounded-2xl shadow-xl w-[350px] text-center">
+        <div className="relative">
+          <img
+            src={
+              profilePic ||
+              "https://via.placeholder.com/150?text=No+Image"
+            }
+            alt="Profile"
+            className="w-32 h-32 rounded-full object-cover mx-auto border-4 border-indigo-500"
+          />
+          <label className="absolute bottom-2 right-16 bg-indigo-500 text-white px-2 py-1 rounded-md cursor-pointer text-sm">
+            Change
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </label>
         </div>
 
-        {/* Total Questions - Square Box */}
-        <div className="flex flex-col items-center justify-center bg-blue-100 rounded-xl p-6">
-          <div className="w-24 h-24 bg-blue-300 rounded-lg flex items-center justify-center text-white text-xl font-bold">
-            {total}
-          </div>
-          <p className="mt-2 text-blue-700 font-medium">Total Questions</p>
+        <h2 className="text-xl font-bold mt-4">Your Profile</h2>
+        <div className="mt-4 space-y-2">
+          <p className="text-gray-700">Total Questions: {totalQuestions}</p>
+          <p className="text-green-600 font-semibold">
+            Solved Questions: {solvedQuestions}
+          </p>
         </div>
       </div>
     </div>
   );
-};
-
-export default UserProfile;
+}

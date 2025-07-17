@@ -2,14 +2,16 @@ import React, { useContext } from 'react'
 import { Link,NavLink,useNavigate } from 'react-router-dom';
 import Authcontext from '../../context/Authcontext';
 import {toast} from "react-toastify"
-
-
+import { clearCodeDrafts } from '../../utils/clearcodedraft';
+import { clearlanguage } from '../../utils/clearlanguage';
 function Header() {
     
     const {user,setUser}=useContext(Authcontext);
     const navigate=useNavigate();
    console.log(user);
     const handlelogout=async()=>{
+        clearCodeDrafts();
+        clearlanguage();
       try{
         const res= await fetch('http://localhost:8000/api/user/logout',{
              method: "POST",

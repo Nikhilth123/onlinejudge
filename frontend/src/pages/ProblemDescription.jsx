@@ -10,8 +10,8 @@ import debounce from 'lodash/debounce';
 function ProblemDescription() {
   const { id } = useParams();
   const [data, setData] = useState({});
-  const [language, setLanguage] = useState('cpp');
-  const [code, setCode] = useState('// Write your code here');
+
+  const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [showOutput, setShowOutput] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -19,7 +19,10 @@ function ProblemDescription() {
   const [airesponse,setairesponse]=useState('');
   const {user}=useContext(Authcontext);
   const [loading,setloading]=useState(false);
+  const languagekey=`lang-${user?.id || 'guest'}-${id}`;
+    const [language, setLanguage] = useState(()=>{return localStorage.getItem(languagekey||'cpp')});
   const localkey=`code-${user?.id||'guest'}-${id}-${language}`;
+
 
 
   const handleairesponse=async(task)=>{
@@ -46,7 +49,9 @@ function ProblemDescription() {
       else{
       const result=await res.json()
       console.log(result)
+      if(task!='boilerplate')
       setairesponse(result)
+    else setCode(result);
       }
 
     }
@@ -57,6 +62,8 @@ function ProblemDescription() {
     setloading(false);
 
   }
+
+ 
 
 
 
@@ -244,6 +251,7 @@ Execution Time: ${result.time} ms
 
    useEffect(() => {
     const loadDraft = async () => {
+      console.log(localkey)
       const local = localStorage.getItem(localkey);
       setCode(local || '');
 
@@ -262,7 +270,13 @@ Execution Time: ${result.time} ms
           return;
         }
       }
+
+      if(!local){
+        handleairesponse('boilerplate');
+      }
+      else{
       setCode(local||'')
+      }
     };
     loadDraft();
   }, [user, id, language]);
@@ -348,7 +362,10 @@ Execution Time: ${result.time} ms
           <div className="p-2 flex justify-between items-center border-b">
             <select
               value={language}
-              onChange={(e) => setLanguage(e.target.value)}
+              onChange={(e) => {
+                setLanguage(e.target.value)
+                localStorage.setItem(languagekey,e.target.value);
+              }}
               className="border p-1 rounded"
             >
               <option value="cpp">C++</option>
