@@ -12,11 +12,11 @@ const useai = async (req, res) => {
     switch (task) {
         case 'hints':
             if (!question) return res.status(400).json({ msg: 'provide question for hints' });
-            prompt = `please provide me some hints i am stucked in this problem :\n${question}`
+            prompt = `please provide me some hints i am stucked in this problem in brief way not detail explanation only some hints to start :\n${question}`
             break;
         case 'boilerplate':
             if (!language || !question) return res.status(400).json({ msg: 'provide problem and language for boiler plate' })
-            prompt =  `genetate a basic simple boiler palte in ${language} for this problem\n${question} just write headerfiles and dont write comments and also not take input it will taken by user and also not write logic `;
+            prompt =  `genetate a basic simple boiler palte in ${language} for this problem\n${question}only give header file and input dont give logic and only code`;
 
             break;
         case 'codeexplanation':

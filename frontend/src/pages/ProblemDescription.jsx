@@ -19,15 +19,16 @@ function ProblemDescription() {
   const [airesponse,setairesponse]=useState('');
   const {user}=useContext(Authcontext);
   const [loading,setloading]=useState(false);
+  const [airesponseloading,setairesponseloading]=useState(false)
   const languagekey=`lang-${user?.id || 'guest'}-${id}`;
-    const [language, setLanguage] = useState(()=>{return localStorage.getItem(languagekey||'cpp')});
+    const [language, setLanguage] = useState(()=>{return localStorage.getItem(languagekey)||'cpp'});
   const localkey=`code-${user?.id||'guest'}-${id}-${language}`;
 
 
 
   const handleairesponse=async(task)=>{
-    if(loading)return;
-    setloading(true);
+    if(airesponseloading)return;
+    setairesponseloading(true);
     const payload={
       language:language,
       code:code,
@@ -59,7 +60,7 @@ function ProblemDescription() {
       console.log(err);
 
     }
-    setloading(false);
+    setairesponseloading(false);
 
   }
 
@@ -107,6 +108,7 @@ const handlesubmit=async()=>{
     
     if(!res.ok){
       const result=await res.json();
+      console.log(result)
       setOutput("Server Error Try again");
       setIsError(true);
 
@@ -302,11 +304,11 @@ Execution Time: ${result.time} ms
         <select
          onChange={(e)=>{handleairesponse(e.target.value)}}
         className="border p-2 rounded  bg-gray-400 mx-4"
-        disabled={loading}
+        disabled={airesponseloading}
         
         defaultValue=""
         >
-          <option value=''disabled>{loading?'Loading...':'TakeAiHelp'}</option>
+          <option value=''disabled>{airesponseloading?'Loading...':'TakeAiHelp'}</option>
           {!code?.trim() && (
   <option value='boilerplate'>boilerplate</option>
 )}
@@ -321,7 +323,7 @@ Execution Time: ${result.time} ms
           <h2 className="font-semibold mt-4">Description</h2>
 
           <p className="whitespace-pre-wrap">{data.description}</p>
-          <button className='bg-amber-300 px-3 py-2 rounded' disabled={loading}onClick={()=>handleairesponse('hints')}>{loading?'Loading...':'AskHints'}</button>
+          <button className='bg-amber-300 px-3 py-2 rounded' disabled={airesponseloading}onClick={()=>handleairesponse('hints')}>{airesponseloading?'Loading...':'AskHints'}</button>
          
           <h2 className="font-semibold mt-4" >Input Format</h2>
           <p>{data.inputFormat}</p>
@@ -363,15 +365,18 @@ Execution Time: ${result.time} ms
             <select
               value={language}
               onChange={(e) => {
+             
+               
                 setLanguage(e.target.value)
                 localStorage.setItem(languagekey,e.target.value);
+                
               }}
               className="border p-1 rounded"
             >
               <option value="cpp">C++</option>
               <option value="java">Java</option>
-              <option value="py">Python</option>
-              <option value="js">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="javascript">JavaScript</option>
               <option value="c">C</option>
             </select>
             <div>
@@ -420,7 +425,7 @@ Execution Time: ${result.time} ms
       </label>
       <button disabled={loading}className='text-sm text-red-600 hover:underline mx-3'
       onClick={()=>handleairesponse('whyerror')}
-      >{loading?'Loading...':'whyerror'}</button>
+      >{airesponseloading?'Loading...':'whyerror'}</button>
       <button
         onClick={handleClearOutput}
         className="text-sm text-red-600 hover:underline"
