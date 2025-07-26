@@ -10,7 +10,7 @@ function SubmissionDescription() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/submission/code/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/submission/code/${id}`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -22,7 +22,7 @@ function SubmissionDescription() {
       } else {
         setData(result);
         setLoading(false);
-        toast.success('Data loaded successfully');
+        
       }
     } catch (err) {
       console.log(err);
@@ -39,7 +39,7 @@ function SubmissionDescription() {
   }
 
   return (
-    <div style={{ padding: '20px' }} className="flex gap-10 items-center justify-center">
+    <div style={{ padding: '20px' }} className="flex gap-10 items-center justify-center flex-grow">
   
       <div>
       <div className="flex items-center gap-2">
@@ -69,21 +69,9 @@ function SubmissionDescription() {
 </div>
       
       <div className="flex flex-col gap-2 mt-4">
-        {
-          data.input&&
-          <>
-        <label>Input</label>
-        <input value={data.input || ''} readOnly className="border p-2 rounded w-[500px]" />
-        </>
-}
-      {data.expectedoutput&&
-        <>
-        <label>Expected Output</label>
-        <input value={data.expectedoutput || ''} readOnly className="border p-2  w-[500px]" />
-        </>
-}
+       
 
-        {data.error ? (
+        {data.error &&(
           <>
             <label className="text-red-500">Error</label>
             <textarea
@@ -93,16 +81,7 @@ function SubmissionDescription() {
               className="border p-2 rounded text-red-600 bg-red-100 w-[500px]"
             />
           </>
-        ) : (
-          <>
-            <label>Output</label>
-            <input
-              value={data.output || ''}
-              readOnly
-              className="border p-2 rounded w-[500px]"
-            />
-          </>
-        )}
+        ) }
       </div>
     </div>
   );

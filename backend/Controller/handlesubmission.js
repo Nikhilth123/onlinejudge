@@ -1,6 +1,8 @@
     import fetch from 'node-fetch';
     import Problem from '../Model/Problemschema.js';
     import UserSubmissions from '../Model/submissionschema.js'
+    import dotenv from 'dotenv';
+    dotenv.config();
 
     const handlesubmission = async (req, res) => {
         try {
@@ -8,8 +10,7 @@
             const {id} = req.user;
             const userId = id; 
             const {code, language } = req.body;
-            console.log("problemid",problemId);
-            console.log("userid",id);
+          
            
 
             if (!problemId || !userId || !code || !language) {
@@ -21,7 +22,7 @@
             }
             const testCases = data.testCases;
            
-            const response = await fetch(`http://localhost:5000/api/submit`, {
+            const response = await fetch(`${process.env.COMPILER_URL}/api/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -34,7 +35,7 @@
             });
             if (!response.ok) {
                 const errorData = await response.json();
-                conaole.log("errorData", errorData);    
+                
                 return res.status(res.status).json({ msg: errorData.msg || "Submission failed" });
             }
             const result = await response.json();
@@ -56,7 +57,7 @@
                 
             return res.status(200).json(result);
         } catch (error) {
-            console.error("Submission error:", error);
+           
             res.status(500).json({ msg: "Internal server error",err });
         }
     }

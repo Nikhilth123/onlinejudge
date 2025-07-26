@@ -12,7 +12,7 @@ const useai = async (req, res) => {
     switch (task) {
         case 'hints':
             if (!question) return res.status(400).json({ msg: 'provide question for hints' });
-            prompt = `please provide me some hints i am stucked in this problem in brief way not detail explanation only some hints to start :\n${question}`
+            prompt = `please provide me some hints i am stucked in this problem  dont give code only some hints to solve problem in 5 to 10 lines:\n${question}`
             break;
         case 'boilerplate':
             if (!language || !question) return res.status(400).json({ msg: 'provide problem and language for boiler plate' })
@@ -21,7 +21,7 @@ const useai = async (req, res) => {
             break;
         case 'codeexplanation':
             if (!code) return res.status(400).json({ msg: 'provide for getting code explantaion' })
-            prompt = `explain this ${code} in brief way assume user has basic knowledge of language `
+            prompt = `explain this ${code} in brief way assume user has basic knowledge of language in at max 200 words `
             break;
         case 'whyerror':
             if (!code) return res.status(400).json({ msg: 'provide  code for detecting error and explain' })

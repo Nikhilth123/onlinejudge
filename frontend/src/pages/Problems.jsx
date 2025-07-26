@@ -16,24 +16,24 @@ function Problems() {
 
   const handledeleteproblem=async(problemid)=>{
     try{
-      const res=fetch(`http://localhost:8000/api/problems/delete/${problemid}`,{
-        method:'Delete',
+      const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/problems/delete/${problemid}`,{
+        method:'DELETE',
         credentials:'include'
       })
       if(!res.ok){
         const result=await res.json();
-        console.log(result);
+       
         toast.error('problem not deleted successfully')
       }
       else{
          const result=await res.json();
          toast.success('problem deleted successfully');
+         navigate('/problems')
 
       }
     }
     catch(err){
-      console.log(err)
-      console.log('server error');
+     
       toast.error('server error try again');
     }
 
@@ -44,12 +44,12 @@ function Problems() {
     
 
     try {
-      const res = await fetch(`http://localhost:8000/api/problems?page=${page}&limit=3&search=${searchTerm}&difficulty=${difficultyFilter}`);
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/problems?page=${page}&limit=5&search=${searchTerm}&difficulty=${difficultyFilter}`);
       if (!res.ok) throw new Error("Failed to fetch problems");
       const data = await res.json();
       setProblemData(data.problems);
       settotalpages(data.totalpages);
-      console.log(data.problems);
+     
     } catch (err) {
       toast.error("Error: " + err.message);
     }
@@ -62,7 +62,7 @@ function Problems() {
   
 
   return (
-    <div className="p-4 w-4xl mx-auto flex-col items-center justify-center">
+    <div className="p-4 w-4xl mx-auto flex-col items-center justify-center flex-grow ">
       <h2 className="text-2xl font-bold mb-6">All Problems</h2>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6 ">

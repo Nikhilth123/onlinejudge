@@ -4,16 +4,18 @@ import cors from 'cors';
 import submitcode from './routes/submitcode.js'
 import ai from './routes/ai.js'
 import './cronecleaner.js'; 
-
+import dotenv from 'dotenv';
+dotenv.config();
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: process.env.FRONTEND_URL,
   credentials: true
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/run',runcode);
 app.use('/api/submit',submitcode);
 app.use('/api/ai',ai);
 
-app.listen(5000,()=>console.log("server is running "));
+app.listen(process.env.PORT||5000,'0.0.0.0',()=>console.log("server is running "));

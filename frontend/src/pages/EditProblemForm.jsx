@@ -85,7 +85,7 @@ function EditProblemForm() {
 
         }
         try{
-        const res=await fetch(`http://localhost:8000/api/problems/edit/${id}`,{
+        const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/problems/edit/${id}`,{
                 method: "PUT",
       credentials: "include", 
       headers: { "Content-Type": "application/json" },

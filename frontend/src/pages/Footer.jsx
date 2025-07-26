@@ -1,24 +1,26 @@
-import React from "react";
-
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 function Footer() {
-  
-
   return (
-    <footer className="bg-gray-800 text-gray-300 py-6 mt-12  shadow sticky z-50">
-      <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
-        
-       
-        <p className="text-sm text-center md:text-left">
-          © {new Date().getFullYear()} <span className="text-yellow-400 font-semibold">OnlineJudge</span>. All rights reserved.
-        </p>
-
-       
-        <div className="flex gap-6 text-sm mt-4 md:mt-0">
-          <a href="/about" className="hover:text-white transition">About</a>
-          <a href="/contact" className="hover:text-white transition">Contact</a>
-          <a href="/privacy" className="hover:text-white transition">Privacy</a>
+    <footer className="bg-gray-100 border-t ">
+      <div className="max-w-screen-xl mx-auto px-4 py-8 md:flex md:justify-between md:items-center">
+        <div className="flex items-center space-x-3">
+         
+          <span className="text-lg font-semibold text-gray-800">Online Judge</span>
         </div>
+
+        <div className="flex flex-wrap gap-6 mt-6 md:mt-0 text-sm text-gray-600">
+          <Link to="/" className="hover:underline">Home</Link>
+          <Link to="/about" className="hover:underline">About</Link>
+          <a href={import.meta.env.VITE_GITHUB} target="_blank" rel="noreferrer" className="hover:underline">GitHub</a>
+          <Link to="/privacy" className="hover:underline">Privacy</Link>
+          <Link to="/terms" className="hover:underline">Terms</Link>
+        </div>
+      </div>
+
+      <div className="text-center text-xs text-gray-500 mt-4 pb-4">
+        © {new Date().getFullYear()} Online Judge. All rights reserved.
       </div>
     </footer>
   );

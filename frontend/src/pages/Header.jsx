@@ -6,14 +6,14 @@ import { clearCodeDrafts } from '../../utils/clearcodedraft';
 import { clearlanguage } from '../../utils/clearlanguage';
 function Header() {
     
-    const {user,setUser}=useContext(Authcontext);
+    const {user,setUser,loading}=useContext(Authcontext);
     const navigate=useNavigate();
-   console.log(user);
+   
     const handlelogout=async()=>{
         clearCodeDrafts();
         clearlanguage();
       try{
-        const res= await fetch('http://localhost:8000/api/user/logout',{
+        const res= await fetch(`${import.meta.env.VITE_BASE_URL}/api/user/logout`,{
              method: "POST",
       credentials: "include", 
             })
@@ -64,6 +64,15 @@ function Header() {
                         >
                             Logout
                         </button>
+
+                        <Link to={`/profile/${user.id}`} className="flex items-center">
+            <img
+              src={user.profilepic || "/default_img.jpg"}
+              alt="profile"
+              className="w-10 h-10 object-cover rounded-full border-2"
+            />
+          </Link>
+
                     </div>
                     )}
 
@@ -92,6 +101,8 @@ function Header() {
                                     Problems
                                 </NavLink>
                             </li>
+
+                            {user&&
                                       <li>
                                 <NavLink
                                 to={`/profile/${user?._id}`}
@@ -102,6 +113,7 @@ function Header() {
                                     Profile
                                 </NavLink>
                             </li>
+                        }
 
                             {user&&user.role=='admin'&&(
                              <li>
@@ -123,7 +135,7 @@ function Header() {
                                         `block py-2 pr-4 pl-3 duration-200 ${isActive ? "text-orange-700":"text-gray-700"} border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 hover:text-orange-700 lg:p-0`
                                     }
                                 >
-                                    ADMIN DASH BOARD
+                                    ADMIN DASHBOARD
                                 </NavLink>
                             </li>
                             )}

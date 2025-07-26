@@ -27,6 +27,8 @@ if(language==='java'){
 }
 
 else{
+    if(language=='python')language='py'
+    else if(language=='javascript')language='js'
 const filename=`${jobid}.${language}`;
 const filePath=path.join(dirCodes,filename)
 

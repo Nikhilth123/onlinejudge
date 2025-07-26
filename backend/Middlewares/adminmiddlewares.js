@@ -7,7 +7,7 @@ const adminMiddleware = (req, res, next) => {
     }
     
     try {
-        const decoded = jwt.verify(token, process.env.secretKey);
+        const decoded = jwt.verify(token, process.env.SECRETKEY);
         if (decoded.role !== 'admin') {
         return res.status(403).json({ msg: "Access denied, admin only" });
         }

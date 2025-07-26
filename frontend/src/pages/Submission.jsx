@@ -10,24 +10,27 @@ function Submission() {
 
        
         try{
-        const res=await fetch(`http://localhost:8000/api/submission/${id}`,{
+        const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/submission/${id}`,{
             method:'GET',
             credentials:'include',
         })
         if(!res.ok){
+
             const result=await res.json();
-            console.log(result.msg);
+            
+            
         }
         else{
             const result=await res.json();
-            console.log(result);
-
+          
+            
             setdata(result);
-                toast.error('data loaded successfully');
+            
+                
         }
     }catch(err){
         toast.error(err.msg);
-        console.log(err);
+       
     }
 
     }
@@ -38,8 +41,13 @@ function Submission() {
 
     
   return (
-       <div style={{ padding: '20px' }}>
-      <h2>My Submissions</h2>
+       <div style={{ padding: '20px' }} className='flex-grow'>
+      
+      {data.length==0?(
+        <h1 className='font-bold text-2xl'>NO submission found for the User</h1>
+       
+      ):(
+        <><h2>My Submissions</h2>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr style={{ backgroundColor: '#f2f2f2' }}>
@@ -65,6 +73,8 @@ function Submission() {
           ))}
         </tbody>
       </table>
+      </>
+      )}
     </div>
   
 

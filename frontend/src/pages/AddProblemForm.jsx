@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {toast} from "react-toastify"
 
 const AddProblemForm = () => {
@@ -17,6 +18,7 @@ const AddProblemForm = () => {
 
   const [testCaseMode, setTestCaseMode] = useState("manual"); // manual or file
   const [file, setFile] = useState(null);
+  const navigate=useNavigate()
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -56,7 +58,7 @@ const AddProblemForm = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:8000/api/problems/addproblem", {
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/problems/addproblem`, {
         method: "POST",
         body: formData,
          credentials: "include", 
@@ -68,6 +70,7 @@ const AddProblemForm = () => {
 
       if (res.ok) {
         toast.success(" Problem added successfully!");
+        navigate('/problems')
       } else {
         toast.error(data.msg + (data.errors ? "\n" + data.errors.join("\n") : ""));
       }

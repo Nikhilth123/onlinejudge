@@ -9,7 +9,7 @@ const generateToken = (user) => {
             id: user._id,
             email: user.email,
             role: user.role 
-        }, process.env.secretKey,
+        }, process.env.SECRETKEY,
         {
             expiresIn: '1d' 
             },

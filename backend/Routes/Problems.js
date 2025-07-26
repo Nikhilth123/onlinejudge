@@ -11,5 +11,5 @@ router.get('/', getAllProblems);
 router.get('/:id',getProblemById);
 router.post('/addproblem',  upload.single("testCasesFile"), addProblem,);
 router.put('/edit/:id',updateproblem,);
-router.delete('delete/:id',adminmiddlewares, deleteproblem);
+router.delete('/delete/:id',adminmiddlewares, deleteproblem);
 export default router;

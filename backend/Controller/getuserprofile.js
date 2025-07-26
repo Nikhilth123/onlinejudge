@@ -13,7 +13,7 @@ export const getUserProfile =async (req, res) => {
         return res.status(401).json({ msg: "No token provided" });
     }
     try {
-        let decoded = jwt.verify(token, process.env.secretKey);
+        let decoded = jwt.verify(token, process.env.SECRETKEY);
         
         decoded=await User.findById(decoded.id).select('-password');
        

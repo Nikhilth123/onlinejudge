@@ -9,13 +9,15 @@ import verifycookie from '../verifycookie.js';
 
 
 const executecode = async (req, res) => {
+  console.log("executecode called");
   const cookie = req.headers.cookie;
-  console.log(cookie);
-
+  
+console.log("cookie:", cookie);
   if (!cookie) {
     return res.status(401).json({ msg: "Please login to run code", err: "Unauthorized" });
   }
   const user = await verifycookie(cookie);
+  console.log("User", user)
   if (!user) {
     return res.status(401).json({ msg: "Please login to run code", err: "Unauthorized" });
   }

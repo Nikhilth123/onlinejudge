@@ -4,7 +4,7 @@ import Header from './pages/Header'
 import Footer from './pages/Footer'
 function Layout() {
   return (
-    <div className='min-hscreen flex flex-col'>
+    <div className='min-h-screen flex flex-col'>
     <Header/>
    
     <Outlet/>

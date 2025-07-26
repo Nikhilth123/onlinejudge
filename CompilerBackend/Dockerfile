@@ -5,5 +5,5 @@ RUN apt-get update &&\
 
 COPY . .
 RUN npm i
-EXPOSE 8000
+EXPOSE 5000
 CMD ["node","index.js"]

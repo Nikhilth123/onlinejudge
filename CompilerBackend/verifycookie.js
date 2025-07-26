@@ -1,8 +1,12 @@
 import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const verifycookie = async (cookie) => {
+    
     try {
-        const res = await fetch(`http://localhost:8000/api/user/me`, {
+       
+        const res = await fetch(`${process.env.AUTHBACKEND_URL}/api/user/me`, {
             method: 'GET',
             headers: {
                 cookie: cookie,

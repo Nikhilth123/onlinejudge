@@ -30,7 +30,7 @@ const handlesubmitcode = async (req, res) => {
              
                 result = await executecpp(filepath, inputfilepath);
           
-            console.log('hello bro');
+           
           
              
                 break;
@@ -56,12 +56,10 @@ const handlesubmitcode = async (req, res) => {
                 break;
         
             }
-console.log("expectedLines",expectedoutput);
-console.log("actualLines",result);
+
             const expectedLines = expectedoutput.trim().split('\n');
 const actualLines = result.output.trim().split('\n');
 
-console.log("actual lines",result)
 if(result.verdict!='Success'){
   return res.status(200).json({
     verdict:result.verdict,
@@ -79,7 +77,7 @@ for (let i = 0; i < expectedLines.length; i++) {
   const actual=actualLines[i]?.trim();
   const expected=expectedLines[i]?.trim();
   if(expected!=actual){
-    console.log("my",testCases[i].input);
+    
     return res.status(200).json({
         verdict:'Wrong Answer',
         testcase:i+1,
@@ -104,7 +102,7 @@ verdict:'Accepted',
 
     }
     catch(err){
-      console.log('hello i am here ')
+    
          return res.status(200).json({
       message: "Code execution failed",
       errorType: err.type || "Unknown Error",

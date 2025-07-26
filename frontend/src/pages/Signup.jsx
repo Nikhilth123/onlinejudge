@@ -1,6 +1,6 @@
 // src/pages/Login.jsx
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Authcontext from "../../context/Authcontext.js";
 import {toast} from "react-toastify"
 
@@ -23,7 +23,7 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try{
-    const res = await fetch("http://localhost:8000/api/user/signup", {
+    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/user/signup`, {
       method: "POST",
       credentials: "include", 
       headers: { "Content-Type": "application/json" },
@@ -46,8 +46,8 @@ function Signup() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 shadow rounded w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen bg-gray-200">
+      <form onSubmit={handleSubmit} className="bg-yellow-100 p-8 shadow rounded w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Signup</h2>
 
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
@@ -86,11 +86,14 @@ function Signup() {
 
         <button
           type="submit"
-          className="bg-blue-600 text-white py-2 px-4 rounded w-full hover:bg-blue-700"
+          className="bg-gray-600 text-white py-2 px-4 rounded w-full hover:bg-blue-700"
         >
           signup
         </button>
+
+        <div>Already have account <Link to='/login' className="text-blue-600 underline">Login</Link></div>
       </form>
+      
     </div>
   );
 }

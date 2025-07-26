@@ -4,7 +4,7 @@ import generateToken from "../Utils/generatetoken.js";
 
 export const handleusersignup=async(req,resp)=>{
     const {name,email,password,role='user'}=req.body;
-    if(!name||!email||!password||!role){   
+    if(!name||!email||!password){   
        return resp.status(400).json({msg:"Enter all fields with valid credentials"});
     }
    
@@ -26,13 +26,13 @@ export const handleusersignup=async(req,resp)=>{
         password:hashedPassword,
         role:role,
     })
-    await User.create(newuser);
+    await newuser.save();
     const token = generateToken(newuser); 
     const {password:pw,...userWithoutPassword} = newuser.toObject();    
     resp.status(201).cookie("token", token, {
       httpOnly: true,  
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax" ,
       maxAge: 24 * 60 * 60 * 1000, 
     }).json({user:userWithoutPassword, msg: "User created successfully" });
 
@@ -40,16 +40,25 @@ export const handleusersignup=async(req,resp)=>{
 }
 
 export const handleuserlogin=async(req,resp)=>{
+  
     const {email,password}=req.body;
     if(!email||!password){
-        resp.status(400).json({msg:"Enter all fields with valid credentials"});
+       return resp.status(400).json({msg:"Enter all fields with valid credentials"});
     }
-    const user=await User.findOne({email});
+    
+    
+
+    const user= await User.findOne({email});
+   
     if(!user){
         return resp.status(400).json({msg:"User not found"});
     }
+  
+  
 
+    
     const isMatch = await bcrypt.compare(password, user.password);
+    
     if(!isMatch) {
         return resp.status(400).json({msg:"Invalid Password"});
     }
@@ -59,7 +68,7 @@ export const handleuserlogin=async(req,resp)=>{
     resp.status(200).cookie("token", token, {
       httpOnly: true,   
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax" ,
       maxAge: 24 * 60 * 60 * 1000, 
     }).json({user:userWithoutPassword, msg: "Login successful" });
 }
@@ -67,13 +76,13 @@ export const handleuserlogin=async(req,resp)=>{
 export const handleuserlogout=(req,resp)=>{
     try {resp.clearCookie("token",{
     httpOnly: true,
-    secure: false,       
-    sameSite: "Strict"
+    secure: process.env.NODE_ENV === "production",   
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax" 
   });
     return resp.status(200).json({msg:"User logged out successfully"});
 }catch(err){
   
-    return resp.status(500).json({ msg: "Logout failed", error: error.message });
+    return resp.status(500).json({ msg: "Logout failed", error: err.message });
 }
 }
 

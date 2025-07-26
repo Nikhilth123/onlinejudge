@@ -1,6 +1,8 @@
 import { json } from "express";
 import Problem from "../Model/Problemschema.js";
 import fs from "fs"
+import UserSubmissions from '../Model/submissionschema.js';
+import CodeDraft from '../Model/CodeDraftSchema.js';
 
 export const getAllProblems = async (req, res) => {
   const {page=1,limit=10 ,search="",difficulty=""} = req.query;
@@ -96,14 +98,17 @@ export const addProblem = async (req, res) => {
 export const updateproblem=async(req, res) => {
     const { id } = req.params;
     const { title, description, difficulty,tags, sampleInput,sampleOutput, inputFormat,outputFormat,constraints,testCases } = req.body;
-    if (!title || !description || !difficulty||!tags||!sampleInput||sampleOutput||!inputFormat||!outputFormat||!constraints||!testCases) {
-        return res.status(400).json({ msg: "Please provide all required fields" });
+   
+    if (!title || !description || !difficulty||!tags||!sampleInput||!sampleOutput||!inputFormat||!outputFormat||!constraints||!testCases) {
+      
+      return res.status(400).json({ msg: "Please provide all required fields" });
     }
     try {
         const updatedProblem = await Problem.findByIdAndUpdate(id, { title, description, difficulty,tags, sampleInput,sampleOutput, inputFormat,outputFormat,constraints,testCases }, { new: true });
         if (!updatedProblem) {
         return res.status(404).json({ msg: "Problem not found" });
         }
+        
         res.status(200).json(updatedProblem);
     } catch (error) {
         res.status(500).json({ msg: "Error updating problem", error: error.message });
@@ -111,16 +116,23 @@ export const updateproblem=async(req, res) => {
 }
 
 export const deleteproblem=async(req,res)=>{
-    const id=req.params;
-    console.log("hello user",id);
+    const {id}=req.params;
+  
     try {
         const deletedProblem = await Problem.findByIdAndDelete(id);
         if (!deletedProblem) {
             return res.status(404).json({ msg: "Problem not found" });
         }
-        res.status(200).json({ msg: "Problem deleted successfully" });
+const submissionDeleteResult = await UserSubmissions.deleteMany({ problemId: id });
+const draftDeleteResult = await CodeDraft.deleteMany({ problemId: id });
+        return res.status(200).json({ msg: "Problem deleted successfully", 
+            deletedProblem,
+      submissionsDeleted: submissionDeleteResult.deletedCount,
+      draftsDeleted: draftDeleteResult.deletedCount,
+        });
     } catch (error) {
-        res.status(500).json({ msg: "Error deleting problem", error: error.message });
+     
+       return  res.status(500).json({ msg: "Error deleting problem", error: error.message });
     }   
 }
 

@@ -10,7 +10,8 @@ import debounce from 'lodash/debounce';
 function ProblemDescription() {
   const { id } = useParams();
   const [data, setData] = useState({});
-
+  const [status,setstatus]=useState('');
+  
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [showOutput, setShowOutput] = useState(false);
@@ -25,7 +26,7 @@ function ProblemDescription() {
   const localkey=`code-${user?.id||'guest'}-${id}-${language}`;
 
 
-
+const navigate=useNavigate();
   const handleairesponse=async(task)=>{
     if(airesponseloading)return;
     setairesponseloading(true);
@@ -37,19 +38,19 @@ function ProblemDescription() {
       task:task
     }
     try{
-      const res=await fetch(`http://localhost:5000/api/ai/help`,{
+      const res=await fetch(`${import.meta.env.VITE_COMPILE_URL}/api/ai/help`,{
         method:'POST',
        headers:{ 'Content-Type':'application/json' },
         body:JSON.stringify(payload)
       })
       if(!res.ok){
          const result=await res.json()
-        console.log("error in fetching try again",result.error)
+       
 
       }
       else{
       const result=await res.json()
-      console.log(result)
+     
       if(task!='boilerplate')
       setairesponse(result)
     else setCode(result);
@@ -77,8 +78,8 @@ function ProblemDescription() {
     localStorage.setItem(localkey,newcode);
     if(user?.id){
       const userId=user?.id
-      console.log("userid=",user.id);
-      await fetch(`http://localhost:8000/api/code/savedraft/${id}`,{
+     
+      await fetch(`${import.meta.env.VITE_BASE_URL}/api/code/savedraft/${id}`,{
         method:'POST',
          headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -92,6 +93,11 @@ function ProblemDescription() {
 const outputref=useRef(null);
 
 const handlesubmit=async()=>{
+  if(!user){
+    toast.error('please login');
+    navigate('/login');
+    return;
+  }
   if(loading)return ;
   setloading(true);
   try{
@@ -99,7 +105,7 @@ const handlesubmit=async()=>{
       code:code,
       language:language,
     }
-    const res=await fetch(`http://localhost:8000/api/submit/${id}`,{
+    const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/submit/${id}`,{
       method:'POST',
       credentials:'include',
       headers:{'Content-Type': 'application/json'},
@@ -108,14 +114,14 @@ const handlesubmit=async()=>{
     
     if(!res.ok){
       const result=await res.json();
-      console.log(result)
+      
       setOutput("Server Error Try again");
       setIsError(true);
 
     }
    else {
     const result=await res.json();
-    if(result.verdict!='Wrong Answer'&& result.verdict!='Success'){
+    if(result.verdict!='Wrong Answer'&& result.verdict!='Accepted'){
       const formatted=`
       Verdict: ${result.verdict}
       time:${result.time}
@@ -123,10 +129,11 @@ const handlesubmit=async()=>{
 
       `
       setOutput(formatted);
-      if(result.verdict!='Wrong Answer')seterror(result.error)
+      seterror(result.error)
       setIsError(true);
     }
 else{
+  if(result.verdict=='Wrong Answer'){
      const formatted = `
 Verdict: ${result.verdict}
 Test Case: ${result.testcase}
@@ -145,7 +152,18 @@ Execution Time: ${result.time} ms
         setOutput(formatted);
         if(result.verdict=='Wrong Answer')
         setIsError(true);
-      else setIsError(false);
+  }
+      else {
+
+          const formatted = `
+Verdict: ${result.verdict}
+
+Total Test Cases: ${result.total}
+Execution Time: ${result.time} ms
+      `.trim();
+        setOutput(formatted);
+        
+        setIsError(false);}
       }
     
       setShowOutput(true);
@@ -155,7 +173,7 @@ Execution Time: ${result.time} ms
   }
 }
   catch(err){
-       console.log(err);
+      
       toast.error("Execution failed");
       setOutput("Execution failed: " + (err.message || "Unknown error"));
       setIsError(true);
@@ -165,6 +183,11 @@ Execution Time: ${result.time} ms
 }
 
   const handleRun = async () => {
+    if(!user){
+      toast.error('login to run code');
+      navigate('/login')
+      return;
+    }
     if(loading)return;
     setloading(true);
     try {
@@ -173,8 +196,9 @@ Execution Time: ${result.time} ms
         language,
         input: data.sampleInput
       };
-
-      const res = await fetch(`http://localhost:5000/api/run`, {
+      const url = `${import.meta.env.VITE_COMPILE_URL}/api/run`
+      console.log("Url", url)
+      const res = await fetch( url, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -196,6 +220,7 @@ ${result.output}
 Execution Time: ${result.time} ms
       `.trim();
         setOutput(formatted);
+        setstatus(result.verdict)
         setIsError(!!result.error);
         
       }
@@ -204,7 +229,7 @@ Execution Time: ${result.time} ms
   outputref.current?.scrollIntoView({ behavior: 'smooth' });
 }, 100);
     } catch (err) {
-      console.log(err);
+     
       toast.error("Execution failed");
       setOutput("Execution failed: " + (err.message || "Unknown error"));
      
@@ -223,7 +248,7 @@ Execution Time: ${result.time} ms
 
   const fetchData = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/problems/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/problems/${id}`, {
         method: 'GET',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -234,7 +259,7 @@ Execution Time: ${result.time} ms
         toast.error(result.msg);
       } else {
         setData(result);
-        toast.success("Problem loaded");
+        
       }
     } catch (err) {
       toast.error('Failed to fetch problem');
@@ -259,7 +284,7 @@ Execution Time: ${result.time} ms
 
       if (user?.id) {
         const userId=user?.id
-        const res = await fetch(`http://localhost:8000/api/code/getdraft/${id}`, {
+        const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/code/getdraft/${id}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -273,7 +298,7 @@ Execution Time: ${result.time} ms
         }
       }
 
-      if(!local){
+      if(!local && data?.description){
         handleairesponse('boilerplate');
       }
       else{
@@ -282,14 +307,14 @@ Execution Time: ${result.time} ms
     };
     loadDraft();
   }, [user, id, language]);
-  const navigate=useNavigate();
+
 
   const handlesubmission=()=>{
     navigate(`/submission/${id}`)
   }
 
   return (
-    <div className="h-screen w-minscreen overflow-hidden">
+    <div className="h-[90vh] w-min-screen overflow-hidden">
       <Split
         direction="horizontal"
         sizes={[50, 50]}
@@ -400,7 +425,7 @@ Execution Time: ${result.time} ms
           {/* Editor */}
           <div className="flex-grow border-r border-gray-300 overflow-hidden pr-6">
             <Editor
-              height="90%"
+              height="100%"
               language={language}
               theme="vs-dark"
               value={code}
@@ -423,9 +448,11 @@ Execution Time: ${result.time} ms
       <label className="block text-sm font-medium text-gray-700">
         Output
       </label>
+      {isError&&
       <button disabled={loading}className='text-sm text-red-600 hover:underline mx-3'
       onClick={()=>handleairesponse('whyerror')}
       >{airesponseloading?'Loading...':'whyerror'}</button>
+}
       <button
         onClick={handleClearOutput}
         className="text-sm text-red-600 hover:underline"
@@ -434,15 +461,18 @@ Execution Time: ${result.time} ms
       </button>
     </div>
     <textarea
-      readOnly
-      value={output}
-      rows={10}
-      className={`w-full p-2 border rounded font-mono text-sm resize-none overflow-auto ${
-        isError
-          ? 'text-red-600 border-red-400 bg-red-50'
-          : 'text-green-700 border-green-400 bg-green-50'
-      }`}
-    />
+  readOnly
+  value={output}
+  rows={10}
+  className={`w-full p-2 border rounded font-mono text-sm resize-none overflow-auto ${
+    isError
+      ? 'text-red-600 border-red-400 bg-red-50'
+      : status === 'Success'
+      ? 'text-black'
+      : 'text-green-700 border-green-400 bg-green-500'
+  }`}
+/>
+
   </div>
 )}
 
