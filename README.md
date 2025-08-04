@@ -1,39 +1,128 @@
-# 🧑‍💻 Online Judge Platform
 
-A modern Online Judge web application where users can solve coding problems, submit code, get instant feedback, and learn more effectively using AI tools like Hint, Code Explanation, Why Error, and Boilerplate generation. Built with secure Docker-based code execution and a complete admin panel.
+# 🧠 Online Judge Platform
+
+A full-stack **Online Judge system** built using the MERN stack, Docker, and role-based access control.  
+This platform enables users to solve coding problems, run and submit code, and get AI-powered help.  
+Admins can manage problems, test cases, and promote users.
 
 ---
 
-## ✨ Features
+## 📁 Project Structure
+
+\`\`\`
+onlinejudge/
+├── frontend/          # Vite + React + React Router-based UI
+├── backend/           # Authentication, problems, submissions, users
+└── compiler-backend/  # Code execution and AI help (uses Docker)
+\`\`\`
+
+---
+
+## 🚀 Features
 
 ### 👨‍💻 User Features
-- Solve coding problems with detailed problem descriptions
-- Submit code in **multiple programming languages** (C++, Python, Java, etc.)
-- Get instant results using sample and hidden test cases
-- View **submission history**:
-  - Input, Output, Error
-  - **Submitted code**
-- 🔐 Register/Login with secure authentication
 
-### 🤖 AI Assistant (Powered by Code LLaMA 7B Instruct via Ollama)
-- **Ask for Hint** — provides a clue based on problem description
-- **Explain Code** — gives line-by-line code explanation
-- **Why Error** — explains compilation or runtime errors
-- **Generate Boilerplate** — generates starter code for selected language
+- View and solve coding problems  
+- Run code and view output  
+- Submit code and get verdicts  
+- View previous submissions  
+- Manage profile
 
-### 🔧 Admin Features
-- Create, edit, and delete problems
-- Upload test cases via `.json` file
-- Download test cases for editing
-- Manually add/edit test cases via UI
-- Set time and memory limits per problem
-- Enable support for multiple languages
+### 🛠️ Admin Features
 
-### 🧱 Tech Stack
-- **Frontend**: React, Tailwind CSS, Fetch API (No Axios)
-- **Backend**: Node.js, Express.js, MongoDB (Mongoose), JWT Authentication
-- **Execution**: Docker for secure and isolated code execution
-- **AI Integration**: Ollama running **Code LLaMA 7B Instruct**
+- Add new problems  
+- Edit/delete existing problems  
+- Add test cases manually  
+- Upload/download test cases as JSON  
+- Promote any user to admin
 
 ---
 
+## ⚙️ Getting Started
+
+### 🔙 Backend Setup
+
+\`\`\`bash
+cd backend
+npm install
+cp .env.example .env  # Fill in MongoDB URI, JWT secret, etc.
+npm start
+\`\`\`
+
+### 🐳 Compiler Backend Setup
+
+> ✅ Requires Docker installed and running
+
+\`\`\`bash
+cd compiler-backend
+cp .env.example .env  # Fill in required env variables
+npm install
+npm start
+\`\`\`
+
+- Uses \`child_process\` for secure code execution in Docker  
+- Handles AI features like hints, explanations, and fixes
+
+### 💻 Frontend Setup
+
+\`\`\`bash
+cd frontend
+npm install
+npm run dev
+\`\`\`
+
+- Built using **Vite**, **React**, and **React Router**
+
+---
+
+## 💾 Database
+
+- Requires **MongoDB** (local or remote)  
+- Used for storing users, problems, test cases, and submissions
+
+---
+
+## 🔐 Role-Based Access Control
+
+| Role   | Permissions                                                                 |
+|--------|------------------------------------------------------------------------------|
+| User   | Run code, submit code, view submissions, and manage profile                 |
+| Admin  | All user actions + add/edit/delete problems, manage test cases, promote users |
+
+---
+
+## 🧪 Test Case Management (Admin Only)
+
+- Add test cases manually in the editor  
+- Download test cases as a \`.json\` file  
+- Upload \`.json\` to replace test cases
+
+---
+
+## 🤖 AI Integration (Compiler Backend)
+
+The compiler backend also supports AI functionality for:
+- Generating **hints**
+- **Explaining** submitted code
+- **Fixing** errors in code
+
+---
+
+## 🧰 Tech Stack
+
+- **Frontend**: React, Vite, Tailwind CSS, React Router  
+- **Backend**: Node.js, Express, MongoDB, JWT  
+- **Compiler Backend**: Node.js, Docker, \`child_process\`  
+- **AI Integration**: Gemini API (or any LLM)
+
+---
+
+## 📎 License
+
+This project is licensed under the **MIT License**.
+
+---
+
+## ✨ Author
+
+Developed by [Nikhil Thakur](https://github.com/Nikhilth123)
