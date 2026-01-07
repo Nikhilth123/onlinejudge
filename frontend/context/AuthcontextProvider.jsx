@@ -6,6 +6,7 @@ import {useState } from "react";
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading,setloading]=useState(true)
+  console.log("hii")
   const fetchuser=async()=>{
     try{
     const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/user/me`,{
