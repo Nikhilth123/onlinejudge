@@ -174,12 +174,12 @@ function ProblemDesc() {
       </div>
 
       {/* ================= DESKTOP VIEW ================= */}
-      <div className="hidden md:flex h-full">
+      <div className="hidden md:flex flex-1">
 
         {/* LEFT PANEL */}
-        <div className="w-1/2 border-r p-4">
+        <div className="w-1/2 border-r">
           <Tabs defaultValue="description" className="h-full flex flex-col">
-            <TabsList className="mb-3">
+            <TabsList className="mb-1 w-full">
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="submissions">Submissions</TabsTrigger>
             </TabsList>
@@ -231,10 +231,10 @@ function ProblemDesc() {
         </div>
 
         {/* RIGHT PANEL */}
-        <div className="flex flex-col flex-1 p-3 gap-3">
+        <div className="flex flex-col flex-1 ">
 
           {/* Toolbar */}
-          <div className="flex items-center justify-between border rounded-md bg-muted/40 px-3 py-2">
+          <div className="flex items-center justify-between border  bg-muted/40 px-3 py-2">
             <Select value={language} onValueChange={setLanguage}>
               <SelectTrigger className="w-[160px]">
                 <SelectValue />
