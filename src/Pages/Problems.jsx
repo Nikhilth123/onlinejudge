@@ -38,47 +38,62 @@ function Problems() {
   }
 
   return (
-    <div className="flex flex-col gap-8 px-4 py-6 max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
 
-      {/* Search */}
-      <div className="w-full flex justify-center">
+      {/* 🔍 SEARCH */}
+      <div className="flex justify-center">
         <Input
-          type="text"
-          placeholder="Search problems"
+          placeholder="Search problems..."
           className="max-w-md"
         />
       </div>
 
-      {/* Problems Table */}
-      <Table className="rounded-xl overflow-hidden border">
-        <TableBody>
-          <TableRow className="cursor-pointer bg-gray-200 hover:bg-gray-400 transition-colors">
+      {/* 📋 PROBLEMS LIST */}
+      <div className="border rounded-xl overflow-hidden">
+        <Table>
+          <TableBody>
 
-            {/* Title */}
-            <TableCell className="font-medium">
-              Two Sum
-            </TableCell>
+            <TableRow
+              className="
+                transition-colors
+                hover:bg-muted/50
+              "
+            >
+              {/* TITLE */}
+              <TableCell className="font-medium">
+                <Link
+                  to="/problem/1"
+                  className="hover:underline"
+                >
+                  Two Sum
+                </Link>
+              </TableCell>
 
-            {/* Difficulty */}
-            <TableCell className="text-right">
-              <Badge className="bg-green-600 hover:bg-green-600">
-                Easy
-              </Badge>
-            </TableCell>
+              {/* DIFFICULTY */}
+              <TableCell className="text-right">
+                <Badge
+                  variant="outline"
+                  className="border-green-500 text-green-500"
+                >
+                  Easy
+                </Badge>
+              </TableCell>
 
-            {/* Solved */}
-            <TableCell className="text-right">
-              <Badge variant="secondary">
-                Solved
-              </Badge>
-            </TableCell>
+              {/* STATUS */}
+              <TableCell className="text-right">
+                <Badge variant="secondary">
+                  Solved
+                </Badge>
+              </TableCell>
 
-            {/* Admin Actions */}
-            <TableCell>
-              <div className="flex justify-end">
+              {/* ACTIONS */}
+              <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                    >
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -91,27 +106,28 @@ function Problems() {
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
-                      className="text-red-600"
+                      className="text-destructive"
                       onClick={() => setOpenDeleteDialog(true)}
                     >
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
-            </TableCell>
+              </TableCell>
+            </TableRow>
 
-          </TableRow>
-        </TableBody>
-      </Table>
+          </TableBody>
+        </Table>
+      </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* 🗑 DELETE DIALOG */}
       <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Problem</DialogTitle>
+            <DialogTitle>
+              Delete Problem
+            </DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this problem?
               This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
@@ -123,7 +139,6 @@ function Problems() {
             >
               Cancel
             </Button>
-
             <Button
               variant="destructive"
               onClick={handleDeleteConfirm}

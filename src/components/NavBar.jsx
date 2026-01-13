@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { ChevronDown, Menu } from "lucide-react"
-
+import ThemeToggle from "./ThemeToggle"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -72,6 +72,7 @@ function Navbar() {
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-3">
+                <ThemeToggle />
 
           {/* MOBILE MENU */}
           <div className="md:hidden">

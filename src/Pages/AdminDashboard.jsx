@@ -9,6 +9,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card"
 
 import {
@@ -36,7 +37,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-import { MoreVertical } from "lucide-react"
+import { MoreVertical, Plus } from "lucide-react"
 
 function AdminDashboard() {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
@@ -47,50 +48,50 @@ function AdminDashboard() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
 
+      {/* 🔥 STATS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="transition-shadow duration-200 hover:shadow-md">
+        <Card className="hover:shadow-xl transition-all hover:-translate-y-0.5">
           <CardHeader>
-            <CardTitle>Total Problems</CardTitle>
+            <CardDescription>Total Problems</CardDescription>
+            <CardTitle className="text-5xl">2456</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-5xl font-bold">2456</p>
-          </CardContent>
         </Card>
 
-        <Card className="transition-shadow duration-200 hover:shadow-md">
+        <Card className="hover:shadow-xl transition-all hover:-translate-y-0.5">
           <CardHeader>
-            <CardTitle>Total Users</CardTitle>
+            <CardDescription>Total Users</CardDescription>
+            <CardTitle className="text-5xl">1324</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-5xl font-bold">1324</p>
-          </CardContent>
         </Card>
       </div>
 
+      {/* 🔥 ACTION CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-        <Card
-          className="
-            cursor-pointer
-            transition-all duration-200 ease-out
-            hover:-translate-y-1
-            hover:shadow-lg
-            hover:border-primary
-          "
-        >
-          <Link to="/createproblem">
-            <CardContent className="flex items-center justify-center h-24">
-              <h2 className="text-2xl font-semibold">Create Problem</h2>
+        <Link to="/createproblem">
+          <Card
+            className="
+              group cursor-pointer
+              transition-all duration-300
+              hover:-translate-y-1
+              hover:shadow-2xl
+              hover:border-primary
+            "
+          >
+            <CardContent className="h-28 flex items-center justify-center gap-3">
+              <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary transition" />
+              <span className="text-2xl font-semibold">Create Problem</span>
             </CardContent>
-          </Link>
-        </Card>
+          </Card>
+        </Link>
 
-  
-        <Card className="transition-shadow duration-200 hover:shadow-md">
+        <Card className="hover:shadow-lg transition-all">
           <CardHeader>
             <CardTitle>Grant Admin Access</CardTitle>
+            <CardDescription>
+              Give admin privileges to an existing user
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex gap-3">
             <Input placeholder="Enter user email" />
@@ -99,61 +100,73 @@ function AdminDashboard() {
         </Card>
       </div>
 
-      <div className="space-y-3">
-        <h2 className="text-xl font-semibold">Recent Created Problems</h2>
+      {/* 🔥 TABLE */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">
+          Recent Created Problems
+        </h2>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Difficulty</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Title</TableHead>
+                <TableHead>Difficulty</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
 
-          <TableBody>
-            <TableRow className="hover:bg-muted/60 transition-colors">
-              <TableCell className="font-medium">
-                Two Sum
-              </TableCell>
+            <TableBody>
+              <TableRow
+                className="
+                  transition-colors
+                  hover:bg-muted/50
+                "
+              >
+                <TableCell className="font-medium">
+                  Two Sum
+                </TableCell>
 
-              <TableCell>
-                <Badge className="bg-green-600">Easy</Badge>
-              </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="border-green-500 text-green-500">
+                    Easy
+                  </Badge>
+                </TableCell>
 
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Link to="/editproblem">Edit</Link>
-                    </DropdownMenuItem>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link to="/editproblem">Edit</Link>
+                      </DropdownMenuItem>
 
-                    <DropdownMenuItem
-                      className="text-red-600"
-                      onClick={() => setOpenDeleteDialog(true)}
-                    >
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => setOpenDeleteDialog(true)}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </Card>
       </div>
 
+      {/* 🔥 DELETE DIALOG */}
       <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Problem</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this problem?
               This action cannot be undone.
             </DialogDescription>
           </DialogHeader>

@@ -48,11 +48,11 @@ function ProblemDesc() {
   }
 
   return (
-    <div className="h-[calc(100vh-56px)] bg-background">
+    <div className="bg-background">
 
       {/* ================= MOBILE VIEW ================= */}
       <div className="md:hidden h-full">
-        <Tabs defaultValue="description" className="h-full flex flex-col">
+        <Tabs defaultValue="description" className=" flex flex-col">
           <TabsList className="w-full">
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="editor">Editor</TabsTrigger>
@@ -178,7 +178,7 @@ function ProblemDesc() {
 
         {/* LEFT PANEL */}
         <div className="w-1/2 border-r">
-          <Tabs defaultValue="description" className="h-full flex flex-col">
+          <Tabs defaultValue="description" className="flex flex-col">
             <TabsList className="mb-1 w-full">
               <TabsTrigger value="description">Description</TabsTrigger>
               <TabsTrigger value="submissions">Submissions</TabsTrigger>
@@ -283,7 +283,7 @@ function ProblemDesc() {
           </div>
 
           {/* Editor */}
-          <div className="flex-1 border rounded-md overflow-hidden">
+          <div className=" h-[90vh] border rounded-md overflow-hidden">
             <Editor
               height="100%"
               language={language}

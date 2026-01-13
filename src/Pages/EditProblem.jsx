@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -19,29 +20,31 @@ function EditProblem() {
   const [testcaseMode, setTestcaseMode] = useState("upload")
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+    <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
 
       {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold">Edit Problem</h1>
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight">
+          Edit Problem
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Problem ID: <span className="font-medium">125</span>
+          Problem ID <span className="font-medium">#125</span>
         </p>
       </div>
 
       {/* BASIC INFO */}
-      <Card>
+      <Card className="transition-all hover:shadow-xl">
         <CardHeader>
           <CardTitle>Basic Information</CardTitle>
         </CardHeader>
 
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="md:col-span-2">
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 space-y-2">
             <Label>Title</Label>
             <Input placeholder="Enter problem title" />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label>Difficulty</Label>
             <Select value={difficulty} onValueChange={setDifficulty}>
               <SelectTrigger>
@@ -57,76 +60,78 @@ function EditProblem() {
         </CardContent>
       </Card>
 
-      {/* DESCRIPTION */}
-      <Card>
+      {/* PROBLEM CONTENT */}
+      <Card className="transition-all hover:shadow-xl">
         <CardHeader>
           <CardTitle>Problem Content</CardTitle>
         </CardHeader>
 
-        <CardContent>
-          <Tabs defaultValue="description" className="w-full">
-            <TabsList>
-              <TabsTrigger value="description">Description</TabsTrigger>
-              <TabsTrigger value="input">Input Format</TabsTrigger>
-              <TabsTrigger value="output">Output Format</TabsTrigger>
-              <TabsTrigger value="examples">Examples</TabsTrigger>
-               <TabsTrigger value="constraints">Constraints</TabsTrigger>
-            </TabsList>
+        <CardContent className="space-y-5">
+          <Tabs defaultValue="description">
 
-            <TabsContent value="description">
+            <ScrollArea>
+              <TabsList className="w-max gap-1">
+                <TabsTrigger value="description">Description</TabsTrigger>
+                <TabsTrigger value="input">Input</TabsTrigger>
+                <TabsTrigger value="output">Output</TabsTrigger>
+                <TabsTrigger value="examples">Examples</TabsTrigger>
+                <TabsTrigger value="constraints">Constraints</TabsTrigger>
+              </TabsList>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+
+            <TabsContent value="description" className="pt-4">
               <Textarea
+                className="min-h-[220px]"
                 placeholder="Write problem description here..."
-                className="min-h-[200px]"
               />
             </TabsContent>
 
-            <TabsContent value="input">
+            <TabsContent value="input" className="pt-4">
               <Textarea
+                className="min-h-[160px]"
                 placeholder="Describe input format..."
-                className="min-h-[150px]"
               />
             </TabsContent>
 
-            <TabsContent value="output">
+            <TabsContent value="output" className="pt-4">
               <Textarea
+                className="min-h-[160px]"
                 placeholder="Describe output format..."
-                className="min-h-[150px]"
               />
             </TabsContent>
 
-            <TabsContent value="examples">
-              <div className="space-y-4">
-                <Textarea placeholder="Sample Input" />
-                <Textarea placeholder="Sample Output" />
-              </div>
+            <TabsContent value="examples" className="pt-4 space-y-3">
+              <Textarea placeholder="Sample Input" />
+              <Textarea placeholder="Sample Output" />
             </TabsContent>
-            <TabsContent value="constraints">
-              <div className="space-y-4">
-                <Textarea placeholder="Constraints" />
-              </div>
+
+            <TabsContent value="constraints" className="pt-4">
+              <Textarea placeholder="Constraints" />
             </TabsContent>
+
           </Tabs>
         </CardContent>
       </Card>
 
       {/* TEST CASES */}
-      <Card>
+      <Card className="transition-all hover:shadow-xl">
         <CardHeader>
           <CardTitle>Test Case Management</CardTitle>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <RadioGroup
             value={testcaseMode}
             onValueChange={setTestcaseMode}
-            className="space-y-2"
+            className="space-y-3"
           >
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <RadioGroupItem value="upload" id="upload" />
               <Label htmlFor="upload">Upload JSON</Label>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <RadioGroupItem value="manual" id="manual" />
               <Label htmlFor="manual">Manual Entry</Label>
             </div>
@@ -137,16 +142,30 @@ function EditProblem() {
           )}
 
           {testcaseMode === "manual" && (
-            <Textarea placeholder="Enter test cases manually..." />
+            <Textarea
+              className="min-h-[140px]"
+              placeholder="Enter test cases manually..."
+            />
           )}
         </CardContent>
       </Card>
 
       {/* ACTIONS */}
-      <div className="flex justify-end gap-3">
-       <Button>Download Existing Json </Button>
-        <Button>Update Problem</Button>
-      </div>
+      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6">
+  <Button
+    variant="outline"
+    className="self-end sm:self-auto"
+  >
+    Download Old TestCases
+  </Button>
+
+  <Button
+    className="self-end sm:self-auto"
+  >
+    Save Changes
+  </Button>
+</div>
+
 
     </div>
   )
