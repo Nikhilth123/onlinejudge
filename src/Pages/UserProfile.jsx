@@ -6,7 +6,13 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { useState, useEffect, useContext } from "react";
 import Authcontext from "@/Context/Authcontext";
 import { useToast } from "@/hooks/use-toast";
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 const cardHover =
   "transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-xl";
 
@@ -22,6 +28,8 @@ function UserProfile() {
   const [totalsubmissions, setTotalSubmissions] = useState(0);
   const [acceptedSubmissions, setAcceptedSubmissions] = useState(0);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
+   const [preview, setPreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 function showtime(prevdate){
   const presentdate=new Date();
   const pastdate=new Date(prevdate);
@@ -81,7 +89,7 @@ console.log("here bro ");
       }
 
       const data = await res.json();
-       console.log("total submission:",totalsubmissions);
+     
       setTotalSubmissions(data.totalSubmissions);
       setAcceptedSubmissions(data.acceptedSubmissions);
 
@@ -135,6 +143,35 @@ console.log("here bro ");
       });
     }
   };
+/*===================Edit Profile===================*/
+const EditProfilePicture=async()=>{
+  if (!selectedFile) {
+      toast.error("No image selected.");
+      return;
+    }
+
+    const form = new FormData();
+    form.append("profilepic", selectedFile);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/profile/picture`, {
+        method: "POST",
+        credentials: "include",
+        body: form,
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        toast.error(result.message || "Profile picture not uploaded. Try again.");
+      } else {
+        toast.success("Profile picture uploaded successfully!");
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error("Server error. Try again later.");
+    }
+}
 
   /* ================= FETCH RECENT SUBMISSIONS ================= */
 
@@ -144,7 +181,6 @@ console.log("here bro ");
         `${import.meta.env.VITE_BASE_URL}/api/submission/user/recentsubmissions`,
         { credentials: "include" }
       );
-      console.log('inside recentSubmissions');
 
       if (!res.ok) {
         const data=await res.json();
@@ -154,7 +190,6 @@ console.log("here bro ");
       }
 
       const data = await res.json();
-      console.log('recent submission:',data.recentsubmissions);
       setRecentSubmissions(data.recentsubmissions);
     } catch {
       setRecentSubmissions([]);
@@ -164,11 +199,8 @@ console.log("here bro ");
   useEffect(() => {
     fetchUser();
     fetchSolvedProblems();
-    console.log('thisis ok');
     fetchRecentSubmissions();
-    console.log('is this ok');
     fetchTotalSubmissions();
-    console.log('ya everything ok');
   }, []);
 
   if (loading) return null;
@@ -208,9 +240,56 @@ console.log("here bro ");
             </div>
           </div>
 
-          <Button variant="outline">
-            Edit Profile
-          </Button>
+          <Dialog>
+  <DialogTrigger asChild>
+    <Button variant="outline">Edit Profile Pic</Button>
+  </DialogTrigger>
+
+  <DialogContent className="sm:max-w-[400px]">
+    <DialogHeader>
+      <DialogTitle>Update Profile Picture</DialogTitle>
+    </DialogHeader>
+
+   <div className="flex flex-col items-center gap-4">
+
+  {/* Preview */}
+  <div className="w-32 h-32 rounded-full overflow-hidden border">
+    <img
+      src={preview || user.avatar}
+      alt="profile"
+      className="w-full h-full object-cover"
+    />
+  </div>
+
+  {/* Upload input */}
+  <label className="cursor-pointer text-sm text-blue-600">
+    Choose Image
+    <input
+      type="file"
+      accept="image/*"
+      hidden
+      onChange={handleImageChange}
+    />
+  </label>
+
+  {/* Submit */}
+  <Button
+    onClick={handleUpload}
+    disabled={loading || !imageFile}
+    className="w-full"
+  >
+    {loading ? "Uploading..." : "Save"}
+  </Button>
+
+</div>
+
+  </DialogContent>
+</Dialog>
+
+{/* 
+          <Button variant="outline" onClick={openeditprofile}>
+            Edit Profile Pic
+          </Button> */}
         </CardContent>
       </Card>
 
