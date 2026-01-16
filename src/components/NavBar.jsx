@@ -1,5 +1,7 @@
-import { Link } from "react-router-dom"
+import { Link, NavLink, useNavigate } from "react-router-dom"
 import { ChevronDown, Menu } from "lucide-react"
+import { useContext } from "react"
+
 import ThemeToggle from "./ThemeToggle"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,11 +18,56 @@ import {
   SheetTrigger,
   SheetContent,
 } from "@/components/ui/sheet"
+import Authcontext from "@/Context/Authcontext"
+import { clearCodeDrafts } from "@/utils/clearcodedraft"
+import { clearlanguage } from "@/utils/clearlanguage"
+import { useToast } from "@/hooks/use-toast";
 
 function Navbar() {
-  // TEMP AUTH STATE (replace with Context later)
-  const isLoggedIn = true
-  const isAdmin = true
+  const { user, setUser, loading } = useContext(Authcontext)
+  const navigate = useNavigate()
+  const { toast } = useToast()
+
+  const isLoggedIn = !!user
+  const isAdmin = user?.role === "admin"
+
+  const handleLogout = async () => {
+    clearCodeDrafts()
+    clearlanguage()
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/user/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      )
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast({
+          variant: "destructive",
+          title: "Logout failed",
+          description: data.msg || "Something went wrong",
+        })
+        return
+      }
+
+      setUser(null)
+      toast({ title: "Logged out successfully" })
+      navigate("/")
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Network error",
+        description: err.message,
+      })
+    }
+  }
+
+  if (loading) return null
 
   return (
     <header className="sticky top-0 z-50 bg-background border-b">
@@ -31,15 +78,29 @@ function Navbar() {
           OnlineJudge
         </Link>
 
-        {/* DESKTOP NAV LINKS */}
+        {/* DESKTOP LINKS */}
         <div className="hidden md:flex items-center gap-2">
-          <Button variant="ghost" asChild>
-            <Link to="/">Home</Link>
-          </Button>
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive
+                ? "text-primary font-medium"
+                : "text-muted-foreground hover:text-foreground"
+            }
+          >
+            Home
+          </NavLink>
 
-          <Button variant="ghost" asChild>
-            <Link to="/problems">Problems</Link>
-          </Button>
+          <NavLink
+            to="/problems"
+            className={({ isActive }) =>
+              isActive
+                ? "text-primary font-medium"
+                : "text-muted-foreground hover:text-foreground"
+            }
+          >
+            Problems
+          </NavLink>
 
           {isAdmin && (
             <DropdownMenu>
@@ -51,15 +112,11 @@ function Navbar() {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="start">
-                <DropdownMenuLabel>Admin Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>Admin</DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
                   <Link to="/createproblem">Create Problem</Link>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <Link to="/editproblem">Edit Problems</Link>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem asChild>
@@ -70,11 +127,11 @@ function Navbar() {
           )}
         </div>
 
-        {/* RIGHT SIDE */}
+        {/* RIGHT */}
         <div className="flex items-center gap-3">
-                <ThemeToggle />
+          <ThemeToggle />
 
-          {/* MOBILE MENU */}
+          {/* MOBILE */}
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -84,14 +141,13 @@ function Navbar() {
               </SheetTrigger>
 
               <SheetContent side="right">
-                <nav className="flex flex-col gap-4 mt-6 text-lg font-medium">
+                <nav className="flex flex-col gap-4 mt-6 text-lg">
                   <Link to="/">Home</Link>
                   <Link to="/problems">Problems</Link>
 
                   {isAdmin && (
                     <>
                       <Link to="/createproblem">Create Problem</Link>
-                      <Link to="/editproblem">Edit Problems</Link>
                       <Link to="/admindashboard">Dashboard</Link>
                     </>
                   )}
@@ -104,8 +160,10 @@ function Navbar() {
                   ) : (
                     <>
                       <Link to="/profile">Profile</Link>
-                      <Link to="/submissions">My Submissions</Link>
-                      <button className="text-left text-red-500">
+                      <button
+                        onClick={handleLogout}
+                        className="text-left text-red-500"
+                      >
                         Logout
                       </button>
                     </>
@@ -115,13 +173,12 @@ function Navbar() {
             </Sheet>
           </div>
 
-          {/* DESKTOP USER DROPDOWN */}
+          {/* DESKTOP USER */}
           {!isLoggedIn ? (
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex gap-2">
               <Button variant="ghost" asChild>
                 <Link to="/login">Login</Link>
               </Button>
-
               <Button asChild>
                 <Link to="/register">Register</Link>
               </Button>
@@ -131,7 +188,9 @@ function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Avatar className="cursor-pointer">
-                    <AvatarFallback>N</AvatarFallback>
+                    <AvatarFallback>
+                      {user?.name?.[0]?.toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
 
@@ -140,20 +199,18 @@ function Navbar() {
                     <Link to="/profile">Profile</Link>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem asChild>
-                    <Link to="/submissions">My Submissions</Link>
-                  </DropdownMenuItem>
-
                   <DropdownMenuSeparator />
 
-                  <DropdownMenuItem className="text-red-500">
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-500"
+                  >
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           )}
-
         </div>
       </nav>
     </header>

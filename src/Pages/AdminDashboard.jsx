@@ -1,8 +1,9 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 import {
   Card,
@@ -10,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 import {
   Table,
@@ -19,14 +20,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 import {
   Dialog,
@@ -35,34 +36,146 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
-import { MoreVertical, Plus } from "lucide-react"
+import { MoreVertical, Plus } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 function AdminDashboard() {
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
+  const { toast } = useToast();
+
+  const [email, setEmail] = useState("");
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openAdminDialog, setOpenAdminDialog] = useState(false);
+
+  const [RecentProblemsData, setRecentProblemsData] = useState([]);
+  const [totalUser, setTotaluser] = useState(0);
+  const [totalProblems, setTotalProblems] = useState(0);
+
+  /* ================= GRANT ADMIN ================= */
+
+  const handlegrantadminaccess = async () => {
+    setOpenAdminDialog(false);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/admin/setadmin`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast({
+          title: "Error",
+          description: data.message || "Failed to update role",
+          variant: "error",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Admin role granted successfully",
+          variant: "success",
+        });
+        setEmail("");
+      }
+    } catch {
+      toast({
+        title: "Server Error",
+        description: "Try again later",
+        variant: "error",
+      });
+    }
+  };
+
+  /* ================= FETCH RECENT PROBLEMS ================= */
+
+  const fetchrecentlycreatedProblems = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/admin/recentproblems`,
+        { credentials: "include" }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast({
+          title: "Error",
+          description: "Error in Fetching Recent Problems",
+          variant: "error",
+        });
+      } else {
+        setRecentProblemsData(data);
+      }
+    } catch {
+      toast({
+        title: "Server Error",
+        description: "Try again later",
+        variant: "error",
+      });
+    }
+  };
+
+  /* ================= FETCH TOTALS ================= */
+
+  const fetchtotalproblemsanduser = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/admin/totalusersandproblems`,
+        { credentials: "include" }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast({
+          title: "Error",
+          description: "Error fetching stats",
+          variant: "error",
+        });
+      } else {
+        setTotalProblems(data.totalProblems);
+        setTotaluser(data.totalUsers);
+      }
+    } catch {
+      toast({
+        title: "Server Error",
+        description: "Try again later",
+        variant: "error",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchrecentlycreatedProblems();
+    fetchtotalproblemsanduser();
+  }, []);
 
   function handleDeleteConfirm() {
-    console.log("Problem deleted")
-    setOpenDeleteDialog(false)
+    console.log("Problem deleted");
+    setOpenDeleteDialog(false);
   }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
-
       {/* 🔥 STATS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="hover:shadow-xl transition-all hover:-translate-y-0.5">
           <CardHeader>
             <CardDescription>Total Problems</CardDescription>
-            <CardTitle className="text-5xl">2456</CardTitle>
+            <CardTitle className="text-5xl">{totalProblems}</CardTitle>
           </CardHeader>
         </Card>
 
         <Card className="hover:shadow-xl transition-all hover:-translate-y-0.5">
           <CardHeader>
             <CardDescription>Total Users</CardDescription>
-            <CardTitle className="text-5xl">1324</CardTitle>
+            <CardTitle className="text-5xl">{totalUser}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -70,18 +183,12 @@ function AdminDashboard() {
       {/* 🔥 ACTION CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link to="/createproblem">
-          <Card
-            className="
-              group cursor-pointer
-              transition-all duration-300
-              hover:-translate-y-1
-              hover:shadow-2xl
-              hover:border-primary
-            "
-          >
+          <Card className="group cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-primary">
             <CardContent className="h-28 flex items-center justify-center gap-3">
               <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary transition" />
-              <span className="text-2xl font-semibold">Create Problem</span>
+              <span className="text-2xl font-semibold">
+                Create Problem
+              </span>
             </CardContent>
           </Card>
         </Link>
@@ -94,8 +201,14 @@ function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex gap-3">
-            <Input placeholder="Enter user email" />
-            <Button>Grant</Button>
+            <Input
+              placeholder="Enter user email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <Button onClick={() => setOpenAdminDialog(true)}>
+              Grant
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -117,45 +230,48 @@ function AdminDashboard() {
             </TableHeader>
 
             <TableBody>
-              <TableRow
-                className="
-                  transition-colors
-                  hover:bg-muted/50
-                "
-              >
-                <TableCell className="font-medium">
-                  Two Sum
-                </TableCell>
+              {RecentProblemsData.map((problem) => (
+                <TableRow
+                  key={problem._id}
+                  className="transition-colors hover:bg-muted/50"
+                >
+                  <TableCell className="font-medium" asChild>
+                    <Link to={`/problems/${problem._id}`} className="hover:underline">{problem.title}</Link>
+                  </TableCell>
 
-                <TableCell>
-                  <Badge variant="outline" className="border-green-500 text-green-500">
-                    Easy
-                  </Badge>
-                </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className="border-green-500 text-green-500"
+                    >
+                      {problem.difficulty}
+                    </Badge>
+                  </TableCell>
 
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
 
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link to="/editproblem">Edit</Link>
-                      </DropdownMenuItem>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link to={`/problem/edit/${problem._id}`}>Edit</Link>
+                        </DropdownMenuItem>
 
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => setOpenDeleteDialog(true)}
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => setOpenDeleteDialog(true)}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </Card>
@@ -188,8 +304,31 @@ function AdminDashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* 🔥 ADMIN DIALOG */}
+      <Dialog open={openAdminDialog} onOpenChange={setOpenAdminDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Grant Admin Access</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setOpenAdminDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handlegrantadminaccess}>
+              Grant Access
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }
 
-export default AdminDashboard
+export default AdminDashboard;

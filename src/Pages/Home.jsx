@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState,useContext } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
-
+import Authcontext from "@/Context/Authcontext"
 const cardHover =
   "transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-xl"
 
 function Home() {
   // 🔐 Replace this later with real auth state
-  const user = { name: "Nikhil" } // set to null if not logged in
-
+  const {user} =useContext(Authcontext)// set to null if not logged in
+//console.log(user.name)
   const displayName = user ? user.name : "Coder"
   const fullText = `Hello ${displayName} 👋`
 

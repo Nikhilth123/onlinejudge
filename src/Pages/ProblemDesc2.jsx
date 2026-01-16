@@ -1,74 +1,394 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react"
+import { Sparkles } from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState,useEffect} from "react";
 import { Editor } from "@monaco-editor/react";
-
+import Authcontext from "@/Context/Authcontext";
+import debounce from "lodash.debounce";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { ChevronDown,ChevronUp } from "lucide-react";
 function ProblemDesc2() {
-    const [language,setLanguage]=useState('cpp');
-    const [openAiSidebar,setOpenAiSidebar]=useState(false)
-    const [opensubmissionsheet,setopensubmissionsheet]=useState(false)
-    const [code,setCode]=useState(" ");
-    function handleaisidebar(){
-        setOpenAiSidebar(true);
+  const [code, setCode] = useState("");
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState(null);
+  const [openAiSidebar, setOpenAiSidebar] = useState(false);
+  const [openSubmissionSheet, setOpenSubmissionSheet] = useState(false);
+const [problemdata,setproblemdata]=useState({})
+const [showTags,setShowTags]=useState(false)
+const[loading,setloading]=useState(false)
+const [airesponseloading,setairesponseloading]=useState(false)
+const {id}=useParams();
+const {user}=useContext(Authcontext)
+const [airesponse,setairesponse]=useState(null)
+const languagekey=`lang-${user?.id || 'guest'}-${id}`;
+  const [language,setLanguage]=useState(()=>{return localStorage.getItem(languagekey)||'cpp'})
+  const localkey=`code-${user?.id||'guest'}-${id}-${language}`;
+const[submissiondata,setsubmissiondata]=useState([]);
+    const [selectedsubmission,setselectedsubmission]=useState(null)
+const [customPrompt, setCustomPrompt] = useState("");
+const [activeAiTask, setActiveAiTask] = useState(null);
+const fetchproblemdata=async()=>{
+  try{
+  const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/problems/${id}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      const problemdata=await res.json();
+      console.log("problem data:",problemdata);
+      if(!res.ok){
+        console.log(problemdata.msg);
+      }
+      else{
+          setproblemdata(problemdata)
+      }
     }
-    function handleopensubmissionsheet(){
-        setopensubmissionsheet(true);
+    catch(err){
+      console.log(err);
     }
+}
+ function handleClearOutput(){
+  setOutput('');
+ }
+const handleRun=async()=>{
+if(!user){
+  console.log('login to run code');
+  useNavigate('/login')
+  return;
+}
+  if(loading)return;
+  setloading(true);
+  try{
+     const payload = {
+        code,
+        language,
+        input: problemdata.sampleInput
+      };
+      const res=await fetch(`${import.meta.env.VITE_COMPILE_URL}/api/run/code`,{
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const result=await res.json();
+      console.log(result);
+      if(!res.ok){
+        console.log(result.msg);
+        setloading(false);
+      }
+      else{
+      setOutput(result);
+      setloading(false);
+      }
+  }
+  catch(err){
+    console.log(err);
+    setloading(false);
+  }
+  
+}
+const handleSubmit=async()=>{
+if(!user){
+  console.log('login to submit the code');
+  useNavigate('/login');
+}
+if(loading)return;
+setloading(true);
+try{
+  const payload={
+      code:code,
+      language:language,
+    }
+  const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/submit/${id}`,{
+      method:'POST',
+      credentials:'include',
+      headers:{'Content-Type': 'application/json'},
+      body:JSON.stringify(payload)
+    })
+    const result=await res.json();
+    if(!res.ok){
+      console.log(result.msg)
+      return;
+    }
+    else{
+      console.log(result);
+      setOutput(result)
+
+    }
+  
+}
+catch(err){
+  console.log(err);
+}
+}
+
+const handlesubmissiondetails=async()=>{
+   try{
+        const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/submission/${id}`,{
+            method:'GET',
+            credentials:'include',
+        })
+        if(!res.ok){
+
+            const result=await res.json();
+            
+            console.log(result.msg)
+        }
+        else{
+            const result=await res.json();
+          
+            console.log(result)
+            setsubmissiondata(result);
+            
+                
+        }
+    }catch(err){
+        console.log(err)
+       
+    }
+}
+   useEffect(()=>{
+        handlesubmissiondetails();
+    },[])
+
+const handleairesponse=async(payload)=>{
+    // const payload={
+    //   language:language,
+    //   code:code,
+    //   question:problemdata.description+problemdata.inputFormat,
+    //   error:output.error,
+    //   task:prompt
+    // }
+    try{
+      const res=await fetch(`${import.meta.env.VITE_COMPILE_URL}/api/ai/help`,{
+        method:'POST',
+       headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify(payload)
+      })
+      if(!res.ok){
+         const result=await res.json()
+       console.log('Ai resu;lt error:',result);
+
+      }
+      else{
+      const result=await res.json()
+     console.log(result);
+      if(prompt!='boilerplate')
+      setairesponse(result)
+    else setCode(result);
+      }
+
+    }
+    catch(err){
+      console.log(err);
+
+    }
+    
+
+  }
+
+
+  const saveCode=debounce(async(newcode)=>{
+    localStorage.setItem(localkey,newcode);
+    if(user?.id){
+      const userId=user?.id
+     
+      await fetch(`${import.meta.env.VITE_BASE_URL}/api/code/savedraft/${id}`,{
+        method:'POST',
+         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ userId, id, language, code: newcode }),
+      })
+    }
+  },2000);
+
+    const handleEditorChange = (value) => {
+    setCode(value);
+  saveCode(value);
+  };
+
+    useEffect(() => {
+    const loadDraft = async () => {
+      console.log(localkey)
+      const local = localStorage.getItem(localkey);
+      setCode(local || '');
+
+      if (user?.id) {
+        const userId=user?.id
+        const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/code/getdraft/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({userId , id, language }),
+        });
+        const data = await res.json();
+        if (data.code) {
+          setCode(data.code);
+          localStorage.setItem(localkey, data.code); 
+          return;
+        }
+      }
+
+      if(!local && problemdata?.description){
+        handleairesponse('boilerplate');
+      }
+      else{
+      setCode(local||'')
+      }
+    };
+    loadDraft();
+  }, [user, id, language]);
+
+
+useEffect(()=>{
+  fetchproblemdata();
+},[])
+
+const handleCustomPrompt = () => {
+  if (airesponseloading) return;
+  if (!customPrompt.trim()) return;
+
+  triggerAi(customPrompt);
+  setCustomPrompt("");
+};
+
+
+const triggerAi = async (task) => {
+  console.log('trigger ai called bro')
+  if (airesponseloading){
+    console.log('yes here ')
+    return;
+  }
+  console.log('here reached ')
+  let payload;
+  if(customPrompt)payload={task:task}
+else  payload={
+      language:language,
+      code:code,
+      question:`${problemdata.description}+${problemdata.inputFormat}`,
+      error:output?.error||'',
+      task:task
+    }
+  setOpenAiSidebar(true);
+  console.log('jfsdfsd')
+  setairesponseloading(true);
+  console.log('jbfhdsfjksdkfsdkjfsds')
+  setActiveAiTask(task);
+  setairesponse(null);
+
+  try {
+    console.log('hwllo i am here ')
+    await handleairesponse(payload);
+  } finally {
+    setairesponseloading(false);
+  }
+};
+
+
   return (
-    <div className="flex flex-col md:flex-row w-full flex-1 overflow-hidden">
-          <div className="md:hidden h-full">
-        <Tabs defaultValue="description" className=" flex flex-col">
-          <TabsList className="w-full">
+    <div className="h-full flex flex-col md:flex-row overflow-hidden">
+
+      {/* ================= MOBILE VIEW (UNCHANGED) ================= */}
+      <div className="md:hidden h-full flex flex-col">
+        <Tabs defaultValue="description" className="flex flex-col h-full">
+          <TabsList className='w-full'>
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="editor">Editor</TabsTrigger>
             <TabsTrigger value="submissions">Submissions</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="description" className="flex-1 p-4">
-            <ScrollArea className="h-full flex-1">
-              <h2 className="text-lg font-semibold mb-2">Two Sum</h2>
-              <p className="text-sm leading-relaxed">
-                Given an array of integers nums and an integer target, return
-                indices of the two numbers such that they add up to target.
+          <TabsContent value="description" className="flex-1 overflow-hidden">
+            <ScrollArea className="h-full p-4">
+              <h2 className="text-lg font-bold mb-2">{problemdata.title}</h2>
+              {problemdata.difficulty=='Easy'&& <Badge className='bg-green-600'>Easy</Badge>}
+             {problemdata.difficulty=='Medium'&& <Badge className='bg-yellow-400'>Medium</Badge>}
+             {problemdata.difficulty=='Hard'&& <Badge className='bg-red-600'>Hard</Badge>}
+              <p>
+               {problemdata.description}
               </p>
+              <h3 className="text-lg font-semibold mb-2">Input</h3>
+              <p>{problemdata.inputFormat}</p>
+              <h3 className="text-lg font-semibold mb-2">Output</h3>
+              <p>{problemdata.outputFormat}</p>
+              <h4 className="text-lg font-semibold mb-2">Constraints</h4>
+              <p>{problemdata.constraints}</p>
+              <h3 className="text-lg font-semibold mb-2">SampleInput</h3>
+              <pre className="border p-2 rounded bg-secondary">{problemdata.sampleInput}</pre>
+              <h3 className="text-lg font-semibold mb-2">SampleOutput</h3>
+              <pre className="border p-2 rounded bg-secondary">{problemdata.sampleOutput}</pre>
+               <div className="mt-3">
+      
+      <button
+        onClick={() => setShowTags(!showTags)}
+        className="
+          flex items-center gap-1
+          text-lg font-semibold mb-2
+        "
+      >
+        {showTags ? "Tags" : "Tags"}
+        {showTags ? (
+          <ChevronUp size={16} />
+        ) : (
+          <ChevronDown size={16} />
+        )}
+      </button>
+
+      {/* Tags */}
+      {showTags && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {problemdata.tags.map((tag) => (
+            <Badge
+              key={tag}
+              variant="outline"
+              className="
+                text-xs
+                rounded-full
+                px-3
+                py-1
+              "
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
+    </div>
             </ScrollArea>
           </TabsContent>
 
-          <TabsContent value="editor" className="flex-1 p-3 flex flex-col gap-3">
+          <TabsContent value="editor" className="flex-1 flex flex-col gap-3 p-3 overflow-hidden">
             {/* Toolbar */}
             <div className="flex flex-col gap-2">
               <Select value={language} onValueChange={setLanguage}>
@@ -83,226 +403,222 @@ function ProblemDesc2() {
               </Select>
 
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">Run</Button>
-                <Button size="sm">Submit</Button>
-                
+                <Button size="sm" onClick={handleRun}>Run</Button>
+                <Button size="sm" onClick={handleSubmit}>Submit</Button>
+
                 <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-1">
-                   <Sparkles className="h-4 w-4 mr-1" /> AI
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="start">
-               
-
-                <DropdownMenuItem asChild>
-                  <button onClick={handleaisidebar}>BoilerPlate</button>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <button onClick={handleaisidebar}>Ask Hints</button>
-                </DropdownMenuItem>
-
-                <DropdownMenuItem asChild>
-                  <button onClick={handleaisidebar}>Optimize Code</button>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-                
-
-                {/* <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setOpenAiSidebar(true)}
-                >
-                  <Sparkles className="h-4 w-4 mr-1" /> AI
-                </Button> */}
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <Sparkles className="h-4 w-4 mr-1" /> AI
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => setOpenAiSidebar(true)}>
+                      BoilerPlate
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setOpenAiSidebar(true)}>
+                      Ask Hints
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setOpenAiSidebar(true)}>
+                      Optimize Code
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 
             {/* Editor */}
-            <div className="h-[60vh] md:flex-1 border rounded-md overflow-hidden">
+            <div className="flex-1 overflow-hidden border rounded-md">
               <Editor
-                height="100%"
+                theme="vs-dark"
                 language={language}
                 value={code}
-                onChange={(v) => setCode(v ?? "")}
-                theme="vs-dark"
+                onChange={handleEditorChange}
                 options={{
                   minimap: { enabled: false },
-                  fontSize: 14,
                   automaticLayout: true,
                 }}
               />
             </div>
+
+            {/* Input */}
+            <div>
+              <p className="text-sm font-medium">Input</p>
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className="w-full h-20 resize-none border rounded p-2 font-mono text-sm"
+              />
+            </div>
+
+            {/* Output */}
+            {output && (
+              <ScrollArea className="max-h-[140px] border rounded p-2">
+                <pre className="font-mono text-sm whitespace-pre-wrap">
+                  {output}
+                </pre>
+              </ScrollArea>
+            )}
           </TabsContent>
 
-          <TabsContent value="submissions" className="flex-1 p-4">
-                <Table>
-  <TableHeader>
-    <TableRow>
-      <TableHead className="w-[100px]">Verdict</TableHead>
-      <TableHead>Date</TableHead>
-      <TableHead>Language</TableHead>
-      <TableHead className="text-right">Time</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    <TableRow onClick={handleopensubmissionsheet}  className="cursor-pointer hover:bg-muted/50 transition-colors">
-      <TableCell className="font-medium">
-       <Badge className="bg-green-600 hover:bg-green-600">
-                Accepted
-              </Badge>
-        </TableCell>
-      <TableCell>12/5/2026</TableCell>
-      <TableCell>
-        <Badge>
-                Cpp
-              </Badge>
-              </TableCell>
-      <TableCell className="text-right">2ms</TableCell>
-    </TableRow>
-  </TableBody>
-</Table>
-            {/* <p className="text-sm text-muted-foreground">
-              No submissions yet.
-            </p> */}
-          </TabsContent>
-        </Tabs>
-      </div>
-
-        {/*Desktop view++++++++++++++++++++++++++++++++++++++++++++++++*/}
-      {/* Left Column (Problem Description) */}
-      <div className=" hidden md:flex flex-col flex-1 border-r">
-        <Tabs
-          defaultValue="Description"
-          className="flex flex-col h-full w-full"
-        >
-          <div className="px-4 pt-2">
-            <TabsList className="w-full justify-start">
-              <TabsTrigger value="Description">Description</TabsTrigger>
-              <TabsTrigger value="Submission">Submission</TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent
-            value="Description"
-            className="flex-1 overflow-hidden mt-0"
-          >
-            {/* The magic: calc(100dvh - total_header_footer_tabs_height) 
-               OR just use flex-1 on the ScrollArea if the parent is h-full 
-            */}
-            <ScrollArea className="h-[calc(100dvh-200px)] w-full p-4">
-              <div className="pr-4">
-                <h2 className="text-xl font-bold mb-4">Jokester's Castle</h2>
-                <p>
-                  Jokester began sneaking into the castle in the middle of the
-                  night and leaving jokes all over the place... Lorem ipsum
-                  dolor sit amet consectetur adipisicing elit. Dignissimos,
-                  cumque expedita totam recusandae sed, sit atque culpa porro
-                  saepe modi quibusdam. Omnis odio ex assumenda asperiores
-                  maxime qui quod corrupti tempora fugiat quasi dolorem commodi
-                  rem similique minima vitae illum, aperiam ipsum, nihil
-                  architecto, accusamus excepturi voluptatum esse neque nostrum.
-                  Nisi, id accusantium! Rem maxime suscipit aspernatur. Animi,
-                  magni. Doloribus optio minima explicabo maiores eum autem,
-                  voluptatibus debitis cum ut consequatur dignissimos aliquam
-                  adipisci deleniti molestiae deserunt ipsa vitae temporibus
-                  exercitationem quaerat labore sit aut. Rerum praesentium modi
-                  ea quis deleniti assumenda blanditiis laudantium, ipsum
-                  similique mollitia? Sit doloremque laudantium temporibus
-                  adipisci quaerat voluptas dolore, earum rerum dolorem quasi
-                  dicta enim tenetur perspiciatis nihil harum. Sapiente omnis
-                  incidunt dolores reprehenderit doloribus, quam asperiores
-                  ipsam nemo laudantium fugiat excepturi alias voluptas
-                  provident tempore quaerat voluptatem velit aut magni fuga,
-                  sequi deserunt. Doloremque natus voluptas dolores accusantium!
-                  Reprehenderit facilis animi consequatur doloremque nemo.
-                  Ducimus numquam nam voluptates delectus ex! Repellendus
-                  quisquam eveniet adipisci laboriosam voluptatibus non
-                  doloribus, aperiam tenetur nisi perferendis illum voluptate
-                  illo ut libero laborum unde similique minima tempore explicabo
-                  autem aliquid eos beatae! Id odit exercitationem, asperiores,
-                  consequatur delectus temporibus pariatur facilis nisi repellat
-                  molestias a praesentium aut! Dicta! Lorem ipsum dolor sit amet
-                  consectetur, adipisicing elit. Quaerat, at quo sunt rem fugiat
-                  culpa reiciendis impedit aperiam ea et quas unde sit corporis
-                  esse molestias incidunt, laboriosam repellendus aut repellat
-                  numquam laudantium expedita excepturi voluptate eum. Ex,
-                  voluptates dolorem ratione at sequi cupiditate quo quidem
-                  corporis. Ipsa, ab nisi aspernatur nemo nesciunt porro
-                  veritatis necessitatibus reiciendis maxime iure eius quidem
-                  dolorum fugiat voluptate minima praesentium quas suscipit cum,
-                  rem animi nihil ad cumque doloremque quasi. Nostrum,
-                  consequatur. Mollitia quisquam nisi aliquam, magnam excepturi
-                  sapiente, quos tempora culpa eos, molestias quod fugit
-                  deserunt a. Mollitia nisi eum blanditiis et, laudantium sit
-                  praesentium corrupti dolorum provident placeat dignissimos
-                  exercitationem nam veritatis cumque, sed sequi quas alias
-                  consequuntur culpa, necessitatibus vitae tenetur. Alias,
-                  reprehenderit temporibus nulla blanditiis natus suscipit
-                  maiores voluptatem exercitationem, quaerat provident soluta
-                  fugiat! Laborum voluptate excepturi consequatur nulla
-                  aspernatur aut porro, esse provident atque error recusandae
-                  rerum ducimus minima? Maiores, ipsam? Architecto alias nisi,
-                  ut nesciunt error quidem doloremque eligendi molestias quaerat
-                  a animi quibusdam quas iusto, aut explicabo similique corporis
-                  debitis omnis reiciendis sunt quo provident? Tempore quo
-                  praesentium voluptates at sequi, odit laborum recusandae,
-                  corrupti velit, quibusdam sapiente odio voluptas corporis?
-                  Rerum praesentium architecto nobis numquam voluptate!
-                  {/* ... your long text ... */}
-                </p>
-                {/* Repetitive content to ensure scrolling */}
-                <div className="h-full mt-4 bg-slate-50 rounded border-dashed border-2 flex items-center justify-center text-muted-foreground">
-                  Long Content Area (Scroll Test)
-                </div>
-              </div>
+          <TabsContent value="submissions" className="flex-1 overflow-hidden p-4">
+            <ScrollArea className="h-full">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Verdict</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Lang</TableHead>
+                    <TableHead className="text-right">Time</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                 {submissiondata.map((submissions)=>{
+                  return(
+                      <TableRow onClick={()=>{
+                          setselectedsubmission(submissions)
+                        setOpenSubmissionSheet(true)
+                      }} key={submissions._id}>
+                        <TableCell>
+                      {submissions.status=='Accepted'&&
+                      <Badge  className="bg-green-600">{submissions.status}</Badge>
+                      } 
+                      {
+                        submissions.status!='Accepted'&&
+                        <Badge  className="bg-red-600">{submissions.status}</Badge>
+                      }
+                        </TableCell>
+                        <TableCell>{new Date(submissions.createdAt).toLocaleString()}</TableCell>
+                        <TableCell>{submissions.language}</TableCell>
+                        <TableCell>{submissions.executionTime}</TableCell>
+                      </TableRow>
+                  )
+                 })}
+                 
+                </TableBody>
+              </Table>
             </ScrollArea>
           </TabsContent>
-
-          <TabsContent value="Submission" className="flex-1">
-            <ScrollArea className="h-full pr-3">
-                <Table>
-  <TableHeader>
-    <TableRow>
-      <TableHead className="w-[100px]">Verdict</TableHead>
-      <TableHead>Date</TableHead>
-      <TableHead>Language</TableHead>
-      <TableHead className="text-right">Time</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    <TableRow onClick={handleopensubmissionsheet}  className="cursor-pointer hover:bg-muted/50 transition-colors">
-      <TableCell className="font-medium">
-       <Badge className="bg-green-600 hover:bg-green-600">
-                Accepted
-              </Badge>
-        </TableCell>
-      <TableCell>12/5/2026</TableCell>
-      <TableCell>
-        <Badge>
-                Cpp
-              </Badge>
-              </TableCell>
-      <TableCell className="text-right">2ms</TableCell>
-    </TableRow>
-  </TableBody>
-</Table>
-                {/* <p className="text-sm text-muted-foreground">
-                  No submissions yet.
-                </p> */}
-              </ScrollArea>
-          </TabsContent>
         </Tabs>
       </div>
 
-      {/* Right Column (Code Editor Placeholder) */}
-      <div className="flex-1 hidden md:block bg-muted/20">
-        {/* Your Code Editor goes here */}
-        <div className="flex flex-row justify-between bg-gray-200 p-1">
-             <Select value={language} onValueChange={setLanguage}>
+      {/* ================= DESKTOP VIEW (STRUCTURE SAME) ================= */}
+      <div className="hidden md:flex flex-1 overflow-hidden">
+
+        {/* LEFT */}
+        <div className="flex-1 border-r overflow-hidden">
+          <Tabs defaultValue="description" className="flex flex-col h-full">
+            <TabsList className='w-full'>
+              <TabsTrigger value="description">Description</TabsTrigger>
+              <TabsTrigger value="submission">Submission</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="description" className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full p-4">
+               <h2 className="text-lg font-bold mb-2">{problemdata.title}</h2>
+              {problemdata.difficulty=='Easy'&& <Badge className='bg-green-600'>Easy</Badge>}
+               {problemdata.difficulty=='Medium'&& <Badge className='bg-yellow-400'>Medium</Badge>}
+             {problemdata.difficulty=='Hard'&& <Badge className='bg-red-600'>Hard</Badge>}
+             
+              <p>
+               {problemdata.description}
+              </p>
+              <h3 className="text-lg font-semibold mb-2">Input</h3>
+              <p>{problemdata.inputFormat}</p>
+              <h3 className="text-lg font-semibold mb-2">Output</h3>
+              <p>{problemdata.outputFormat}</p>
+              <h4 className="text-lg font-semibold mb-2">Constraints</h4>
+              <p>{problemdata.constraints}</p>
+              <h3 className="text-lg font-semibold mb-2">SampleInput</h3>
+              <pre className="border p-2 rounded bg-secondary">{problemdata.sampleInput}</pre>
+              <h3 className="text-lg font-semibold mb-2">SampleOutput</h3>
+              <pre className="border p-2 rounded bg-secondary">{problemdata.sampleOutput}</pre>
+               <div className="mt-3">
+      
+      <button
+        onClick={() => setShowTags(!showTags)}
+        className="
+          flex items-center gap-1
+          text-lg font-semibold mb-2
+        "
+      >
+        {showTags ? "Tags" : "Tags"}
+        {showTags ? (
+          <ChevronUp size={16} />
+        ) : (
+          <ChevronDown size={16} />
+        )}
+      </button>
+
+      {/* Tags */}
+      {showTags && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {problemdata.tags.map((tag) => (
+            <Badge
+              key={tag}
+              variant="outline"
+              className="
+                text-xs
+                rounded-full
+                px-3
+                py-1
+              "
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
+    </div>
+              </ScrollArea>
+            </TabsContent>
+
+            <TabsContent value="submission" className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full p-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Verdict</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Lang</TableHead>
+                      <TableHead className="text-right">Time</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {submissiondata.map((submissions)=>{
+                  return(
+                      <TableRow onClick={()=>{
+                          setselectedsubmission(submissions)
+                        setOpenSubmissionSheet(true)
+                        }} key={submissions._id} className='hover:cursor-pointer'>
+                        <TableCell>
+                      {submissions.status=='Accepted'&&
+                      <Badge  className="bg-green-600">{submissions.status}</Badge>
+                      } 
+                      {
+                        submissions.status!='Accepted'&&
+                        <Badge  className="bg-red-600">{submissions.status}</Badge>
+                      }
+                        </TableCell>
+                        <TableCell>{new Date(submissions.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>{submissions.language}</TableCell>
+                        <TableCell>{submissions.executionTime}</TableCell>
+                      </TableRow>
+                  )
+                 })}
+                  </TableBody>
+                </Table>
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* RIGHT */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-muted/20">
+
+          {/* Toolbar */}
+          <div className="flex justify-between p-2 bg-background border-b">
+            <Select value={language} onValueChange={setLanguage}>
               <SelectTrigger className="w-[160px]">
                 <SelectValue />
               </SelectTrigger>
@@ -312,75 +628,256 @@ function ProblemDesc2() {
                 <SelectItem value="python">Python</SelectItem>
               </SelectContent>
             </Select>
-          <DropdownMenu>
-  <DropdownMenuTrigger asChild><Button variant="ghost" className="flex items-center gap-1">
-                   <Sparkles className="h-4 w-4 mr-1" /> AI
-                </Button></DropdownMenuTrigger>
+
+            <div className="flex gap-2">
+              <Button onClick={handleRun}>Run</Button>
+              <Button className="bg-green-500 hover:bg-green-600" onClick={handleSubmit}>Submit</Button>
+
+             <DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="ghost">
+      <Sparkles className="h-4 w-4 mr-1" />
+      AI
+    </Button>
+  </DropdownMenuTrigger>
+
   <DropdownMenuContent>
-    <DropdownMenuItem asChild>
-        <button onClick={handleaisidebar}>BoilerPlate</button></DropdownMenuItem>
-     <DropdownMenuItem asChild>
-        <button onClick={handleaisidebar}>Ask Hints</button></DropdownMenuItem>
-         <DropdownMenuItem asChild>
-        <button onClick={handleaisidebar}>Optimise</button></DropdownMenuItem>
-         <DropdownMenuItem asChild>
-        <button onClick={handleaisidebar}>Explain soln</button></DropdownMenuItem>
+    <DropdownMenuItem onClick={() => triggerAi("hint")}>
+      Hint
+    </DropdownMenuItem>
+
+    <DropdownMenuItem onClick={() => triggerAi("explain")}>
+      Explain Code
+    </DropdownMenuItem>
+
+    <DropdownMenuItem onClick={() => triggerAi("fix")}>
+      Fix Error
+    </DropdownMenuItem>
+
+    <DropdownMenuItem onClick={() => triggerAi("optimize")}>
+      Optimize Code
+    </DropdownMenuItem>
   </DropdownMenuContent>
 </DropdownMenu>
-<div className="px-2">
-  <Button className="mx-4">Run</Button>
-          <Button className="bg-green-500 hover:bg-green-600">Submit</Button>
-          </div>
-        </div>
-        <div className="h-[75vh] overflow-hidden w-full">
-        <Editor
-        theme="vs-dark"
-      height="100%" // Now 100% refers to the flex-1 div above
-      language={language}
-      options={{
-        automaticLayout: true, // Crucial: resizes editor when window changes
-        minimap: { enabled: false }
-      }}
-        >
 
-        </Editor>
+            </div>
+          </div>
+
+          {/* Editor */}
+          <div className="flex-1 overflow-hidden">
+            <Editor
+              theme="vs-dark"
+              language={language}
+              value={code}
+              onChange={handleEditorChange}
+              options={{
+                minimap: { enabled: false },
+                automaticLayout: true,
+              }}
+            />
+          </div>
+
+         {/* INPUT (SCROLLABLE) */}
+<div className="border-t bg-background p-2">
+  <p className="text-sm font-medium mb-1">Input</p>
+
+  <ScrollArea className="max-h-[140px] border rounded">
+    <textarea
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      className="w-full min-h-[120px] resize-none p-2 font-mono text-sm outline-none"
+      placeholder="Enter custom input..."
+    />
+  </ScrollArea>
+</div>
+
+{/* OUTPUT (SCROLLABLE + CLEAR BUTTON) */}
+{output && (
+  <div className="border-t bg-muted p-2">
+    <div className="flex items-center justify-between mb-1">
+      <p className="text-sm font-medium">Output</p>
+      <Button variant="ghost" size="sm" onClick={handleClearOutput}>
+        Clear
+      </Button>
+    </div>
+
+    <ScrollArea className="max-h-[160px] border rounded p-2">
+     {(output.verdict=='Success'||output.verict=='Accepted')&& <h3 className="font-semibold text-green-700">{output.verdict}</h3>}
+     {(output.verdict!='Success'||output.verdict!='Accepted')&&<h3 className="font-semibold text-red-500">{output.verdict}</h3>}
+
+      {output.error && (
+        <p className="text-red-500 whitespace-pre-wrap">
+          {output.error}
+        </p>
+      )}
+
+      {output.output && (
+        <pre className="font-mono whitespace-pre-wrap">
+        {output.output}
+        </pre>
+      )}
+     {output.testcase&&<pre className="font-mono whitespace-pre-wrap">TestcasesPassed:{output?.testcase-1}/{output?.total}</pre>}
+      {output.time !== undefined && (
+        <p className="text-xs text-muted-foreground">
+          Time: {output.time} ms
+        </p>
+      )}
+    </ScrollArea>
+  </div>
+)}
+
+
+
         </div>
       </div>
-        {/* AI SHEET */}
-     <Sheet open={openAiSidebar} onOpenChange={setOpenAiSidebar}>
-  <SheetContent className="top-[56px] h-[calc(100vh-56px)] w-full sm:w-[400px] flex flex-col">
+
+      {/* ================= AI SHEET (UNCHANGED) ================= */}
+      <Sheet open={openAiSidebar} onOpenChange={setOpenAiSidebar}>
+  <SheetContent className="top-[56px] h-[calc(100dvh-56px)] w-full md:w-[420px] flex flex-col">
+
+    {/* HEADER */}
     <SheetHeader>
-      <SheetTitle>AI Assistant</SheetTitle>
-      <SheetDescription>
-        Ask hints, explanations or generate boilerplate.
-      </SheetDescription>
+      <SheetTitle className="flex items-center gap-2">
+        <Sparkles className="h-5 w-5 text-purple-500" />
+        AI Assistant
+      </SheetTitle>
+
+      {activeAiTask && (
+        <SheetDescription className="capitalize">
+          Task: {activeAiTask}
+        </SheetDescription>
+      )}
     </SheetHeader>
 
-    <ScrollArea className="mt-4 flex-1 pr-2">
-      <p className="text-sm text-muted-foreground">
-        AI responses will appear here...
-      </p>
+    {/* RESPONSE */}
+    <ScrollArea className="flex-1 mt-4 border rounded p-3">
+      {airesponseloading && (
+        <p className="text-sm text-muted-foreground animate-pulse">
+          AI is thinking...
+        </p>
+      )}
+
+      {!airesponseloading && !airesponse && (
+        <p className="text-sm text-muted-foreground">
+          Ask AI using the options or write your own prompt below.
+        </p>
+      )}
+
+      {airesponse && (
+        <pre className="whitespace-pre-wrap text-sm font-mono">
+          {airesponse}
+        </pre>
+      )}
     </ScrollArea>
+
+    {/* CUSTOM PROMPT INPUT */}
+    <div className="border-t pt-2 mt-2 flex gap-2">
+      <textarea
+        value={customPrompt}
+        onChange={(e) => setCustomPrompt(e.target.value)}
+        placeholder="Ask AI anything..."
+        rows={2}
+        className="flex-1 resize-none border rounded p-2 text-sm font-mono"
+        disabled={airesponseloading}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleCustomPrompt();
+          }
+        }}
+      />
+
+      <Button
+        size="sm"
+        onClick={handleCustomPrompt}
+        disabled={airesponseloading || !customPrompt.trim()}
+      >
+        Send
+      </Button>
+    </div>
+
   </SheetContent>
 </Sheet>
 
-<Sheet open={opensubmissionsheet} onOpenChange={setopensubmissionsheet}>
- 
-  <SheetContent side="top"   className="
-    top-[56px]
-    h-[calc(100vh-56px)]
-    w-full
-    md:max-w-4xl
-    md:mx-auto
-    flex flex-col
-  ">
+      {/* ================= SUBMISSION SHEET (UNCHANGED) ================= */}
+     <Sheet open={openSubmissionSheet} onOpenChange={setOpenSubmissionSheet}>
+  <SheetContent
+    side="top"
+    className="top-[56px] h-[calc(100dvh-56px)] w-full md:max-w-4xl md:mx-auto"
+  >
     <SheetHeader>
-      <SheetTitle>Are you absolutely sure?</SheetTitle>
+      <SheetTitle>Submission Details : {problemdata?.title}</SheetTitle>
       <SheetDescription>
-        This action cannot be undone. This will permanently delete your account
-        and remove your data from our servers.
+        Detailed result of this submission
       </SheetDescription>
     </SheetHeader>
+
+    {selectedsubmission && (
+      <ScrollArea className="mt-4 h-full p-2 space-y-4">
+
+        {/* META */}
+        <div className="flex flex-wrap gap-3 text-sm">
+          <Badge>{selectedsubmission.language}</Badge>
+
+          <Badge
+            className={
+              selectedsubmission.status === "Accepted"
+                ? "bg-green-600"
+                : "bg-red-600"
+            }
+          >
+            {selectedsubmission.status}
+          </Badge>
+
+          <span>
+            {new Date(selectedsubmission.createdAt).toLocaleString()}
+          </span>
+
+          <span>
+            Time: {selectedsubmission.executionTime} ms
+          </span>
+        </div>
+
+        {/* CODE */}
+        <div>
+          <h3 className="font-semibold mb-1">Submitted Code</h3>
+          <pre className="bg-muted p-3 rounded text-sm overflow-x-auto">
+            {selectedsubmission.code}
+          </pre>
+        </div>
+
+        {/* INPUT */}
+        {selectedsubmission.input&&selectedsubmission.output&& (
+          <div>
+            <h3 className="font-semibold mb-1">Input</h3>
+            <pre className="bg-muted p-3 rounded text-sm">
+              {selectedsubmission.input}
+            </pre>
+          </div>
+        )}
+
+        {/* OUTPUT */}
+        {selectedsubmission.output&&selectedsubmission.input && (
+          <div>
+            <h3 className="font-semibold mb-1">Output</h3>
+            <pre className="bg-muted p-3 rounded text-sm">
+              {selectedsubmission.output}
+            </pre>
+          </div>
+        )}
+
+        {/* ERROR */}
+        {selectedsubmission.error && (
+          <div>
+            <h3 className="font-semibold mb-1 text-red-500">Error</h3>
+            <pre className="bg-red-50 text-red-600 p-3 rounded text-sm">
+              {selectedsubmission.error}
+            </pre>
+          </div>
+        )}
+
+      </ScrollArea>
+    )}
   </SheetContent>
 </Sheet>
 
