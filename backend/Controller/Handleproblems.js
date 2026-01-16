@@ -3,7 +3,7 @@ import Problem from "../Model/Problemschema.js";
 import fs from "fs"
 import UserSubmissions from '../Model/submissionschema.js';
 import CodeDraft from '../Model/CodeDraftSchema.js';
-
+import User from "../Model/User.js";
 export const getAllProblems = async (req, res) => {
   const {page=1,limit=10 ,search="",difficulty=""} = req.query;
   const  query=search?{ title: { $regex: search, $options: "i" } } : {};
@@ -137,3 +137,23 @@ const draftDeleteResult = await CodeDraft.deleteMany({ problemId: id });
 }
 
 
+export const recentproblems=async(req,res)=>{
+  try{
+    const problems=await Problem.find().sort({createdAt:-1}).limit(10);
+    res.status(200).json(problems);
+  }
+  catch(err){
+    res.status(500).json({msg:"Internal server error",error:err});
+  }
+
+}
+export const totaluserandproblems=async(req,res)=>{{
+  try{
+    const totalProblems=await Problem.countDocuments(); 
+    const totalUsers=await User.countDocuments();
+    res.status(200).json({totalProblems,totalUsers});
+  }
+  catch(err){
+    res.status(500).json({msg:"Internal server error",error:err});
+  }
+}}

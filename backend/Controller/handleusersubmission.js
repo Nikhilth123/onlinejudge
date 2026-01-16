@@ -19,5 +19,21 @@ const handleusersubmission = async (req, res) => {
 
     }
 }
+export const handleusertotalsubmissions= async (req, res) => {
+    try{
+        const { id } = req.user;
+        if (!id) {
+            return res.status(400).json({ msg: "User ID is required" });
+        }
+        const totalSubmissions = await UserSubmissions.countDocuments({ userId: id });
+        const totalacceptedSubmissions = await UserSubmissions.countDocuments({ userId: id, status: 'Accepted' });
+        const recentsubmissions = await UserSubmissions.find({ userId: id }).sort({ createdAt: -1 }).populate('problemId', 'title').limit(10);
+
+        return res.status(200).json({ totalSubmissions, totalacceptedSubmissions, recentsubmissions });
+    }
+    catch(err){
+        res.status(500).json({ msg: "Internal server error", error: err }); 
+    }
+}
 
 export default handleusersubmission;

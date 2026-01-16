@@ -2,9 +2,7 @@ import './App.css'
 import { BrowserRouter,Route,Router, Routes } from 'react-router-dom'
 import MainLayout from './Layouts/MainLayout'
 import  Home  from './Pages/Home'
-import NavBar from './components/NavBar.jsx'
 import Problems from './Pages/Problems'
-import ProblemDesc from './Pages/ProblemDesc'
 import CreateProblem from './Pages/CreateProblem'
 import EditProblem from './Pages/EditProblem'
 import AdminDashboard from './Pages/AdminDashboard'
@@ -15,6 +13,7 @@ import { Toaster } from './components/ui/toaster'
 import Login from './Pages/Login'
 import Signup from './Pages/Signup'
 import ProblemDescLayout from './Layouts/ProblemDescLayout'
+import { ToastContainer } from 'react-toastify';
 function App() {
   
 console.log('hello chacha');
@@ -38,7 +37,7 @@ console.log('hello chacha');
     <Route path='/login' element={<Login></Login>}></Route>
     <Route path='/signup' element={<Signup></Signup>}></Route>
    </Routes>
-   <Toaster/>
+       <ToastContainer />
    </BrowserRouter>
   )
 }

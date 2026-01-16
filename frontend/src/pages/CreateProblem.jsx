@@ -15,11 +15,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import {toast} from 'react-toastify'
 
 function CreateProblem() {
   const navigate = useNavigate();
-  const { toast } = useToast();
+
 
   const [testcaseMode, setTestcaseMode] = useState("upload");
   const [file, setFile] = useState(null);

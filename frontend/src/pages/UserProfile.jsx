@@ -28,44 +28,48 @@ function UserProfile() {
   const [totalsubmissions, setTotalSubmissions] = useState(0);
   const [acceptedSubmissions, setAcceptedSubmissions] = useState(0);
   const [recentSubmissions, setRecentSubmissions] = useState([]);
-   const [preview, setPreview] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-function showtime(prevdate){
-  const presentdate=new Date();
-  const pastdate=new Date(prevdate);
-  const diffSeconds=Math.floor((presentdate-pastdate)/1000);
-  if (diffSeconds < 60) return `${diffSeconds}s ago`;
+  const [preview, setPreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [loadingimage, setloadingimage] = useState(false);
+  const[openimagedialog,setopenimagedialog]=useState(false);
+  function showtime(prevdate) {
+    const presentdate = new Date();
+    const pastdate = new Date(prevdate);
+    const diffSeconds = Math.floor((presentdate - pastdate) / 1000);
+    if (diffSeconds < 60) return `${diffSeconds}s ago`;
 
-  const diffMinutes = Math.floor(diffSeconds / 60);
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
 
-  const diffHours = Math.floor(diffMinutes / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
 
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 30) return `${diffDays}d ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 30) return `${diffDays}d ago`;
 
-  const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths < 12) return `${diffMonths}mo ago`;
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths < 12) return `${diffMonths}mo ago`;
 
-  const diffYears = Math.floor(diffMonths / 12);
-  return `${diffYears}y ago`;
-}
+    const diffYears = Math.floor(diffMonths / 12);
+    return `${diffYears}y ago`;
+  }
   /* ================= FETCH USER ================= */
 
   const fetchUser = async () => {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/user/me`,
-        { credentials: "include" }
-      );
+      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/user/me`, {
+        credentials: "include",
+      });
 
       if (!res.ok) {
+        console.log("no user bro ");
         setUser(null);
         return;
       }
 
       const data = await res.json();
+      console.log("userdatahjksbjadfjkdkf:", data);
+      console.log(data.user.profilepic);
       setUser(data.user);
     } catch {
       setUser(null);
@@ -76,23 +80,25 @@ function showtime(prevdate){
 
   const fetchTotalSubmissions = async () => {
     try {
+      console.log("in fetch ");
       const res = await fetch(
         `${import.meta.env.VITE_BASE_URL}/api/submission/user/totalsubmissions`,
         { credentials: "include" }
       );
-console.log("here bro ");
+      console.log("here bro is am ");
       if (!res.ok) {
         const data = await res.json();
-        console.log("no ok bro:",data);
+        console.log("no ok bro:", data);
         setTotalSubmissions(0);
         return;
       }
 
       const data = await res.json();
-     
-      setTotalSubmissions(data.totalSubmissions);
-      setAcceptedSubmissions(data.acceptedSubmissions);
 
+      setTotalSubmissions(data.totalSubmissions);
+      setAcceptedSubmissions(data.totalacceptedSubmissions);
+      setRecentSubmissions(data.recentsubmissions);
+      console.log("data is:", data);
     } catch {
       setTotalSubmissions(0);
     }
@@ -109,8 +115,8 @@ console.log("here bro ");
       console.log("inside solvedproblem");
 
       if (!res.ok) {
-        const data =await res.json();
-        console.log('solved problem error:',data);
+        const data = await res.json();
+        console.log("solved problem error:", data);
         toast({
           title: "Error",
           description: "Could not fetch solved problems",
@@ -143,63 +149,61 @@ console.log("here bro ");
       });
     }
   };
-/*===================Edit Profile===================*/
-const EditProfilePicture=async()=>{
-  if (!selectedFile) {
-      toast.error("No image selected.");
+  /*===================Edit Profile picture===================*/
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImageFile(file);
+    setPreview(URL.createObjectURL(file)); // preview
+  };
+
+  const EditProfilePicture = async () => {
+    if (!imageFile) {
+      console.log("no image file selected");
       return;
     }
-
+    if (loadingimage) {
+      console.log("one image is being loaded please wait");
+      return;
+    }
+    setloadingimage(true);
     const form = new FormData();
-    form.append("profilepic", selectedFile);
+    form.append("profilepic", imageFile);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/profile/picture`, {
-        method: "POST",
-        credentials: "include",
-        body: form,
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/profile/picture`,
+        {
+          method: "POST",
+          credentials: "include",
+          body: form,
+        }
+      );
 
       const result = await res.json();
 
       if (!res.ok) {
-        toast.error(result.message || "Profile picture not uploaded. Try again.");
+        console.log(
+          result.message || "Profile picture not uploaded. Try again."
+        );
       } else {
-        toast.success("Profile picture uploaded successfully!");
+        console.log("Profile picture uploaded successfully!");
+         await fetchUser();   
+      setPreview(null);     
+      setImageFile(null);
       }
+      setopenimagedialog(false);
+      setloadingimage(false);
     } catch (err) {
       console.log(err);
-      toast.error("Server error. Try again later.");
-    }
-}
-
-  /* ================= FETCH RECENT SUBMISSIONS ================= */
-
-  const fetchRecentSubmissions = async () => {
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/submission/user/recentsubmissions`,
-        { credentials: "include" }
-      );
-
-      if (!res.ok) {
-        const data=await res.json();
-        console.log('recent submission error:',data);
-        setRecentSubmissions([]);
-        return;
-      }
-
-      const data = await res.json();
-      setRecentSubmissions(data.recentsubmissions);
-    } catch {
-      setRecentSubmissions([]);
+      setloadingimage(false);
     }
   };
 
   useEffect(() => {
     fetchUser();
     fetchSolvedProblems();
-    fetchRecentSubmissions();
     fetchTotalSubmissions();
   }, []);
 
@@ -207,16 +211,12 @@ const EditProfilePicture=async()=>{
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-10">
-
-      {/* USER HEADER */}
+     
       <Card className={cardHover}>
         <CardContent className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
           <Avatar className="h-24 w-24">
-            {user?.profilePic && user.profilePic.trim() !== "" && (
-              <AvatarImage
-                src={user.profilePic}
-                alt={user.name}
-              />
+            {user?.profilepic && user?.profilepic?.trim() !== "" && (
+              <AvatarImage src={user.profilepic} alt={user.name} />
             )}
 
             <AvatarFallback className="text-2xl font-bold">
@@ -225,75 +225,67 @@ const EditProfilePicture=async()=>{
           </Avatar>
 
           <div className="flex-1 space-y-2 text-center sm:text-left">
-            <h1 className="text-2xl font-bold">
-              {user?.name || "Loading..."}
-            </h1>
+            <h1 className="text-2xl font-bold">{user?.name || "Loading..."}</h1>
 
             <p className="text-sm text-muted-foreground">
               {user?.email || "Loading..."}
             </p>
 
             <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-              <Badge variant="outline">
-                {user?.role || "User"}
-              </Badge>
+              <Badge variant="outline">{user?.role || "User"}</Badge>
             </div>
           </div>
 
-          <Dialog>
-  <DialogTrigger asChild>
-    <Button variant="outline">Edit Profile Pic</Button>
-  </DialogTrigger>
+          <Dialog open={openimagedialog} onOpenChange={setopenimagedialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Edit Profile Pic</Button>
+            </DialogTrigger>
 
-  <DialogContent className="sm:max-w-[400px]">
-    <DialogHeader>
-      <DialogTitle>Update Profile Picture</DialogTitle>
-    </DialogHeader>
+            <DialogContent className="sm:max-w-[400px]">
+              <DialogHeader>
+                <DialogTitle>Update Profile Picture</DialogTitle>
+              </DialogHeader>
 
-   <div className="flex flex-col items-center gap-4">
+              <div className="flex flex-col items-center gap-4">
+               
+                <div className="w-32 h-32 rounded-full overflow-hidden border">
+                  <img
+                    src={preview || user?.profilepic||'/default_avatar.jpg'}
+                    alt="profile"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
 
-  {/* Preview */}
-  <div className="w-32 h-32 rounded-full overflow-hidden border">
-    <img
-      src={preview || user.avatar}
-      alt="profile"
-      className="w-full h-full object-cover"
-    />
-  </div>
+              
+                <label className="cursor-pointer text-sm text-blue-600">
+                  Choose Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleImageChange}
+                  />
+                </label>
 
-  {/* Upload input */}
-  <label className="cursor-pointer text-sm text-blue-600">
-    Choose Image
-    <input
-      type="file"
-      accept="image/*"
-      hidden
-      onChange={handleImageChange}
-    />
-  </label>
+                {/* Submit */}
+                <Button
+                  onClick={EditProfilePicture}
+                  disabled={loading || !imageFile}
+                  className="w-full"
+                >
+                  {loadingimage ? "Uploading..." : "Save"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
-  {/* Submit */}
-  <Button
-    onClick={handleUpload}
-    disabled={loading || !imageFile}
-    className="w-full"
-  >
-    {loading ? "Uploading..." : "Save"}
-  </Button>
-
-</div>
-
-  </DialogContent>
-</Dialog>
-
-{/* 
+          {/* 
           <Button variant="outline" onClick={openeditprofile}>
             Edit Profile Pic
           </Button> */}
         </CardContent>
       </Card>
 
-      {/* STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <Card className={cardHover}>
           <CardHeader>
@@ -323,7 +315,7 @@ const EditProfilePicture=async()=>{
         </Card>
       </div>
 
-      {/* SOLVED BREAKDOWN */}
+     
       <Card className={cardHover}>
         <CardHeader>
           <CardTitle>Solved Problems by Difficulty</CardTitle>
@@ -345,7 +337,7 @@ const EditProfilePicture=async()=>{
         </CardContent>
       </Card>
 
-      {/* RECENT SUBMISSIONS */}
+     
       <Card className={cardHover}>
         <CardHeader>
           <CardTitle>Recent Submissions</CardTitle>
@@ -367,14 +359,12 @@ const EditProfilePicture=async()=>{
                   key={submission._id}
                   className="hover:bg-muted/40 transition-colors"
                 >
-                  <TableCell className="font-medium" aschild>
+                  <TableCell className="font-medium">
                     {submission.problemId.title}
                   </TableCell>
 
                   <TableCell>
-                    <Badge variant="secondary">
-                      {submission.status}
-                    </Badge>
+                    <Badge variant="secondary">{submission.status}</Badge>
                   </TableCell>
 
                   <TableCell className="text-right text-sm text-muted-foreground">
@@ -386,7 +376,6 @@ const EditProfilePicture=async()=>{
           </Table>
         </CardContent>
       </Card>
-
     </div>
   );
 }

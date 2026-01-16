@@ -73,6 +73,7 @@ const fetchproblemdata=async()=>{
       }
       else{
           setproblemdata(problemdata)
+          setInput(problemdata.sampleInput)
       }
     }
     catch(err){
@@ -94,7 +95,7 @@ if(!user){
      const payload = {
         code,
         language,
-        input: problemdata.sampleInput
+        input: input
       };
       const res=await fetch(`${import.meta.env.VITE_COMPILE_URL}/api/run/code`,{
         method: 'POST',
@@ -124,7 +125,10 @@ if(!user){
   console.log('login to submit the code');
   useNavigate('/login');
 }
-if(loading)return;
+if(loading){
+  console.log('loading not set to false')
+  return;
+}
 setloading(true);
 try{
   const payload={
@@ -140,17 +144,20 @@ try{
     const result=await res.json();
     if(!res.ok){
       console.log(result.msg)
+      setloading(false);
       return;
     }
     else{
       console.log(result);
       setOutput(result)
+      setloading(false)
 
     }
   
 }
 catch(err){
   console.log(err);
+  setloading(false);
 }
 }
 
@@ -199,7 +206,7 @@ const handleairesponse=async(payload)=>{
       })
       if(!res.ok){
          const result=await res.json()
-       console.log('Ai resu;lt error:',result);
+       console.log('Ai result error:',result);
 
       }
       else{
@@ -453,12 +460,33 @@ else  payload={
 
             {/* Output */}
             {output && (
-              <ScrollArea className="max-h-[140px] border rounded p-2">
-                <pre className="font-mono text-sm whitespace-pre-wrap">
-                  {output}
-                </pre>
-              </ScrollArea>
-            )}
+  <div className="border-t bg-muted p-2">
+    <div className="flex items-center justify-between mb-1">
+      <p className="text-sm font-medium">Output</p>
+      <Button variant="ghost" size="sm" onClick={handleClearOutput}>
+        Clear
+      </Button>
+    </div>
+
+    <ScrollArea className="h-[160px] border rounded p-2">
+     {(output.verdict=='Success'||output.verict=='Accepted')&& <h3 className="font-semibold text-green-700">{output.verdict}</h3>}
+     {(output.verdict!='Success'||output.verdict!='Accepted')&&<h3 className="font-semibold text-red-500">{output.verdict}</h3>}
+
+      {output.error && (
+        <p className="text-red-500 whitespace-pre-wrap">
+          {output.error}
+        </p>
+      )}
+
+      {output.output && (
+        <pre className="font-mono whitespace-pre-wrap">
+        {output.output}
+        </pre>
+      )}
+    
+    </ScrollArea>
+  </div>
+)}
           </TabsContent>
 
           <TabsContent value="submissions" className="flex-1 overflow-hidden p-4">
@@ -677,10 +705,9 @@ else  payload={
             />
           </div>
 
-         {/* INPUT (SCROLLABLE) */}
+        
 <div className="border-t bg-background p-2">
   <p className="text-sm font-medium mb-1">Input</p>
-
   <ScrollArea className="max-h-[140px] border rounded">
     <textarea
       value={input}
@@ -701,7 +728,7 @@ else  payload={
       </Button>
     </div>
 
-    <ScrollArea className="max-h-[160px] border rounded p-2">
+    <ScrollArea className="h-[160px] border rounded p-2">
      {(output.verdict=='Success'||output.verict=='Accepted')&& <h3 className="font-semibold text-green-700">{output.verdict}</h3>}
      {(output.verdict!='Success'||output.verdict!='Accepted')&&<h3 className="font-semibold text-red-500">{output.verdict}</h3>}
 
@@ -716,12 +743,7 @@ else  payload={
         {output.output}
         </pre>
       )}
-     {output.testcase&&<pre className="font-mono whitespace-pre-wrap">TestcasesPassed:{output?.testcase-1}/{output?.total}</pre>}
-      {output.time !== undefined && (
-        <p className="text-xs text-muted-foreground">
-          Time: {output.time} ms
-        </p>
-      )}
+    
     </ScrollArea>
   </div>
 )}
@@ -799,87 +821,166 @@ else  payload={
   </SheetContent>
 </Sheet>
 
-      {/* ================= SUBMISSION SHEET (UNCHANGED) ================= */}
-     <Sheet open={openSubmissionSheet} onOpenChange={setOpenSubmissionSheet}>
+   <Sheet open={openSubmissionSheet} onOpenChange={setOpenSubmissionSheet}>
   <SheetContent
     side="top"
-    className="top-[56px] h-[calc(100dvh-56px)] w-full md:max-w-4xl md:mx-auto"
+    className="
+      top-[56px]
+      inset-x-0
+      bottom-0
+      w-full
+      md:max-w-4xl
+      md:mx-auto
+      p-0
+      flex
+      flex-col
+      bg-background
+      overflow-x-hidden
+    "
   >
-    <SheetHeader>
-      <SheetTitle>Submission Details : {problemdata?.title}</SheetTitle>
-      <SheetDescription>
+    {/* HEADER */}
+    <SheetHeader className="px-4 py-3 border-b shrink-0">
+      <SheetTitle className="text-sm md:text-lg">
+        Submission Details : {problemdata?.title}
+      </SheetTitle>
+      <SheetDescription className="text-xs md:text-sm">
         Detailed result of this submission
       </SheetDescription>
     </SheetHeader>
 
+    {/* BODY */}
     {selectedsubmission && (
-      <ScrollArea className="mt-4 h-full p-2 space-y-4">
+      <ScrollArea className="flex-1 px-4 py-3 overflow-x-hidden">
+        <div className="space-y-5 pb-8">
 
-        {/* META */}
-        <div className="flex flex-wrap gap-3 text-sm">
-          <Badge>{selectedsubmission.language}</Badge>
+          {/* META */}
+          <div className="flex flex-wrap gap-2 text-xs md:text-sm items-center">
+            <Badge>{selectedsubmission.language}</Badge>
 
-          <Badge
-            className={
-              selectedsubmission.status === "Accepted"
-                ? "bg-green-600"
-                : "bg-red-600"
-            }
-          >
-            {selectedsubmission.status}
-          </Badge>
+            <Badge
+              className={
+                selectedsubmission.status === "Accepted"
+                  ? "bg-green-600"
+                  : "bg-red-600"
+              }
+            >
+              {selectedsubmission.status}
+            </Badge>
 
-          <span>
-            {new Date(selectedsubmission.createdAt).toLocaleString()}
-          </span>
+            <span className="text-muted-foreground">
+              {new Date(selectedsubmission.createdAt).toLocaleString()}
+            </span>
 
-          <span>
-            Time: {selectedsubmission.executionTime} ms
-          </span>
+            <span className="text-muted-foreground">
+              Time: {selectedsubmission.executionTime} ms
+            </span>
+          </div>
+
+          {/* CODE */}
+          <div>
+            <h3 className="font-semibold text-sm mb-1">
+              Submitted Code
+            </h3>
+            <pre
+              className="
+                bg-muted
+                p-3
+                rounded
+                text-xs
+                md:text-sm
+                max-w-full
+                overflow-x-auto
+                whitespace-pre-wrap
+                break-all
+                break-words
+                max-h-[320px]
+              "
+            >
+              {selectedsubmission.code}
+            </pre>
+          </div>
+
+          {/* INPUT */}
+          {selectedsubmission.input && (
+            <div>
+              <h3 className="font-semibold text-sm mb-1">
+                Input
+              </h3>
+              <pre
+                className="
+                  bg-muted
+                  p-3
+                  rounded
+                  text-xs
+                  md:text-sm
+                  overflow-x-auto
+                  whitespace-pre-wrap
+                  break-words
+                  max-h-[200px]
+                "
+              >
+                {selectedsubmission.input}
+              </pre>
+            </div>
+          )}
+
+          {/* OUTPUT */}
+          {selectedsubmission.output && (
+            <div>
+              <h3 className="font-semibold text-sm mb-1">
+                Output
+              </h3>
+              <pre
+                className="
+                  bg-muted
+                  p-3
+                  rounded
+                  text-xs
+                  md:text-sm
+                  overflow-x-auto
+                  whitespace-pre-wrap
+                  break-words
+                  max-h-[200px]
+                "
+              >
+                {selectedsubmission.output}
+              </pre>
+            </div>
+          )}
+
+          {/* ERROR */}
+          {selectedsubmission.error && (
+            <div>
+              <h3 className="font-semibold text-sm mb-1 text-red-500">
+                Error
+              </h3>
+              <pre
+                className="
+                  bg-red-50
+                  text-red-600
+                  p-3
+                  rounded
+                  text-xs
+                  max-w-full
+                  md:text-sm
+                  overflow-x-auto
+                  whitespace-pre-wrap
+                  break-all
+                  max-h-[200px]
+                "
+              >
+                {selectedsubmission.error}
+              </pre>
+            </div>
+          )}
+
         </div>
-
-        {/* CODE */}
-        <div>
-          <h3 className="font-semibold mb-1">Submitted Code</h3>
-          <pre className="bg-muted p-3 rounded text-sm overflow-x-auto">
-            {selectedsubmission.code}
-          </pre>
-        </div>
-
-        {/* INPUT */}
-        {selectedsubmission.input&&selectedsubmission.output&& (
-          <div>
-            <h3 className="font-semibold mb-1">Input</h3>
-            <pre className="bg-muted p-3 rounded text-sm">
-              {selectedsubmission.input}
-            </pre>
-          </div>
-        )}
-
-        {/* OUTPUT */}
-        {selectedsubmission.output&&selectedsubmission.input && (
-          <div>
-            <h3 className="font-semibold mb-1">Output</h3>
-            <pre className="bg-muted p-3 rounded text-sm">
-              {selectedsubmission.output}
-            </pre>
-          </div>
-        )}
-
-        {/* ERROR */}
-        {selectedsubmission.error && (
-          <div>
-            <h3 className="font-semibold mb-1 text-red-500">Error</h3>
-            <pre className="bg-red-50 text-red-600 p-3 rounded text-sm">
-              {selectedsubmission.error}
-            </pre>
-          </div>
-        )}
-
       </ScrollArea>
     )}
   </SheetContent>
 </Sheet>
+
+
 
     </div>
   );

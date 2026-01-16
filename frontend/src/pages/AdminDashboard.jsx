@@ -133,12 +133,14 @@ function AdminDashboard() {
       const data = await res.json();
 
       if (!res.ok) {
+        console.log('hjdhkhak')
         toast({
           title: "Error",
           description: "Error fetching stats",
           variant: "error",
         });
       } else {
+        console.log("totaldata:",data)
         setTotalProblems(data.totalProblems);
         setTotaluser(data.totalUsers);
       }
