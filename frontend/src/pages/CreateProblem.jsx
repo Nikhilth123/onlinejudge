@@ -37,7 +37,7 @@ function CreateProblem() {
     testCases: [],
   });
 
-  /* ================= HANDLERS ================= */
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,7 +49,7 @@ function CreateProblem() {
     setFile(uploaded);
   };
 
-  /* ================= SUBMIT ================= */
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,7 +116,7 @@ function CreateProblem() {
     }
   };
 
-  /* ================= UI ================= */
+ 
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">

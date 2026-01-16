@@ -57,7 +57,7 @@ function Problems() {
   const [selectedProblemId, setSelectedProblemId] = useState(null);
   const [solvedSet, setSolvedSet] = useState(new Set());
 
-  /* ---------------- FETCH PROBLEMS ---------------- */
+
   const fetchProblems = async () => {
     try {
       const res = await fetch(
@@ -70,7 +70,7 @@ function Problems() {
       if (!res.ok) throw new Error("Failed to fetch problems");
 
       const data = await res.json();
-      console.log(data);
+     
       setProblemData(data.problems);
       setTotalPages(data.totalpages);
     } catch (err) {
@@ -82,7 +82,6 @@ function Problems() {
     }
   };
 
-  /* ---------------- FETCH SOLVED PROBLEMS ---------------- */
   const fetchSolvedProblems = async () => {
     if (!user) return;
 
@@ -91,13 +90,12 @@ function Problems() {
         `${import.meta.env.VITE_BASE_URL}/api/user/solvedproblems`,
         { credentials: "include" }
       );
-      console.log("Here");
+    
       const data = await res.json();
-      console.log("There");
-      console.log(data);
+     
       setSolvedSet(new Set(data.solvedProblems.map((p) => p._id)));
     } catch (err) {
-      console.error(err);
+     toast.error(err)
     }
   };
 
@@ -109,7 +107,7 @@ function Problems() {
     fetchSolvedProblems();
   }, [user]);
 
-  /* ---------------- DELETE PROBLEM ---------------- */
+
   const handleDeleteConfirm = async () => {
     if (!selectedProblemId) return;
 
@@ -152,7 +150,7 @@ function Problems() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-      {/* 🔍 SEARCH + FILTER */}
+    
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Input
           placeholder="Search problems..."
@@ -183,7 +181,7 @@ function Problems() {
         </Select>
       </div>
 
-      {/* 📋 PROBLEMS LIST */}
+    
       <div className="border rounded-xl overflow-hidden">
         <Table>
           <TableBody>
@@ -192,7 +190,7 @@ function Problems() {
                 key={problem._id}
                 className="transition-colors hover:bg-muted/50"
               >
-                {/* TITLE */}
+              
                 <TableCell className="font-medium">
                   <Link
                     to={`/problems/${problem._id}`}
@@ -202,7 +200,7 @@ function Problems() {
                   </Link>
                 </TableCell>
 
-                {/* DIFFICULTY */}
+               
                 <TableCell className="text-right">
                   <Badge
                     variant="outline"
@@ -218,7 +216,7 @@ function Problems() {
                   </Badge>
                 </TableCell>
 
-                {/* STATUS */}
+              
                 <TableCell className="text-right">
                   {solvedSet.has(problem._id) ? (
                     <Badge className="bg-green-600 text-white">Solved</Badge>
@@ -227,7 +225,7 @@ function Problems() {
                   )}
                 </TableCell>
 
-                {/* ACTIONS (ADMIN ONLY) */}
+                
                 <TableCell className="text-right">
                   {isAdmin && (
                     <DropdownMenu>
@@ -239,7 +237,7 @@ function Problems() {
 
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                          <Link to={`/editproblem/${problem._id}`}>Edit</Link>
+                          <Link to={`/problem/edit/${problem._id}`}>Edit</Link>
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
@@ -261,7 +259,7 @@ function Problems() {
         </Table>
       </div>
 
-      {/* 🗑 DELETE DIALOG */}
+   
       <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
         <DialogContent>
           <DialogHeader>
@@ -282,7 +280,7 @@ function Problems() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/*===================Pagination=======================================*/}
+      
       <Pagination>
   <PaginationContent>
     <PaginationItem>

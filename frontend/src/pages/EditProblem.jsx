@@ -37,7 +37,7 @@ function EditProblem() {
     testCases: [],
   });
 
-  /* ================= FETCH DATA ================= */
+  
 
   async function fetchdata() {
     try {
@@ -71,7 +71,7 @@ function EditProblem() {
     fetchdata();
   }, [id]);
 
-  /* ================= HANDLERS ================= */
+  
 
   const handlechange = (e) => {
     const { name, value } = e.target;
@@ -147,7 +147,7 @@ function EditProblem() {
     }
   };
 
-  /* ================= UI ================= */
+ 
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 space-y-12">
@@ -193,7 +193,6 @@ function EditProblem() {
         </CardContent>
       </Card>
 
-      {/* PROBLEM CONTENT */}
       <Card className="transition-all hover:shadow-xl">
         <CardHeader>
           <CardTitle>Problem Content</CardTitle>
@@ -260,7 +259,7 @@ function EditProblem() {
         </CardContent>
       </Card>
 
-      {/* TEST CASES */}
+    
       <Card className="transition-all hover:shadow-xl">
         <CardHeader>
           <CardTitle>Test Case Management</CardTitle>

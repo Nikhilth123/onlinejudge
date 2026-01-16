@@ -327,7 +327,7 @@ else  payload={
   return (
     <div className="h-full flex flex-col md:flex-row overflow-hidden">
 
-      {/* ================= MOBILE VIEW (UNCHANGED) ================= */}
+      {/* ================= MOBILE VIEW ================= */}
       <div className="md:hidden h-full flex flex-col">
         <Tabs defaultValue="description" className="flex flex-col h-full">
           <TabsList className='w-full'>
@@ -410,8 +410,8 @@ else  payload={
               </Select>
 
               <div className="flex gap-2">
-                <Button size="sm" onClick={handleRun}>Run</Button>
-                <Button size="sm" onClick={handleSubmit}>Submit</Button>
+                <Button size="sm" onClick={handleRun}> {loading ? "Running..." : "Run"}</Button>
+                <Button size="sm" onClick={handleSubmit}> {loading ? "Submitting..." : "Submit"}</Button>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -434,7 +434,7 @@ else  payload={
               </div>
             </div>
 
-            {/* Editor */}
+           
             <div className="flex-1 overflow-hidden border rounded-md">
               <Editor
                 theme="vs-dark"
@@ -448,7 +448,7 @@ else  payload={
               />
             </div>
 
-            {/* Input */}
+           
             <div>
               <p className="text-sm font-medium">Input</p>
               <textarea
@@ -458,7 +458,7 @@ else  payload={
               />
             </div>
 
-            {/* Output */}
+            
             {output && (
   <div className="border-t bg-muted p-2">
     <div className="flex items-center justify-between mb-1">
@@ -530,10 +530,10 @@ else  payload={
         </Tabs>
       </div>
 
-      {/* ================= DESKTOP VIEW (STRUCTURE SAME) ================= */}
+      {/* ================= DESKTOP VIEW ================= */}
       <div className="hidden md:flex flex-1 overflow-hidden">
 
-        {/* LEFT */}
+       
         <div className="flex-1 border-r overflow-hidden">
           <Tabs defaultValue="description" className="flex flex-col h-full">
             <TabsList className='w-full'>
@@ -578,7 +578,7 @@ else  payload={
         )}
       </button>
 
-      {/* Tags */}
+      
       {showTags && (
         <div className="flex flex-wrap gap-2 mt-2">
           {problemdata.tags.map((tag) => (
@@ -641,10 +641,9 @@ else  payload={
           </Tabs>
         </div>
 
-        {/* RIGHT */}
+       
         <div className="flex-1 flex flex-col overflow-hidden bg-muted/20">
 
-          {/* Toolbar */}
           <div className="flex justify-between p-2 bg-background border-b">
             <Select value={language} onValueChange={setLanguage}>
               <SelectTrigger className="w-[160px]">
@@ -658,8 +657,8 @@ else  payload={
             </Select>
 
             <div className="flex gap-2">
-              <Button onClick={handleRun}>Run</Button>
-              <Button className="bg-green-500 hover:bg-green-600" onClick={handleSubmit}>Submit</Button>
+              <Button onClick={handleRun}>{loading ? "Running..." : "Run"}</Button>
+              <Button className="bg-green-500 hover:bg-green-600" onClick={handleSubmit}>{loading ? "Submitting ..." : "Submit"}</Button>
 
              <DropdownMenu>
   <DropdownMenuTrigger asChild>
@@ -691,7 +690,7 @@ else  payload={
             </div>
           </div>
 
-          {/* Editor */}
+         
           <div className="flex-1 overflow-hidden">
             <Editor
               theme="vs-dark"
@@ -718,7 +717,6 @@ else  payload={
   </ScrollArea>
 </div>
 
-{/* OUTPUT (SCROLLABLE + CLEAR BUTTON) */}
 {output && (
   <div className="border-t bg-muted p-2">
     <div className="flex items-center justify-between mb-1">
@@ -753,11 +751,10 @@ else  payload={
         </div>
       </div>
 
-      {/* ================= AI SHEET (UNCHANGED) ================= */}
+      {/* ================= AI SHEET ================= */}
       <Sheet open={openAiSidebar} onOpenChange={setOpenAiSidebar}>
   <SheetContent className="top-[56px] h-[calc(100dvh-56px)] w-full md:w-[420px] flex flex-col">
 
-    {/* HEADER */}
     <SheetHeader>
       <SheetTitle className="flex items-center gap-2">
         <Sparkles className="h-5 w-5 text-purple-500" />
@@ -771,7 +768,7 @@ else  payload={
       )}
     </SheetHeader>
 
-    {/* RESPONSE */}
+   
     <ScrollArea className="flex-1 mt-4 border rounded p-3">
       {airesponseloading && (
         <p className="text-sm text-muted-foreground animate-pulse">
@@ -792,7 +789,6 @@ else  payload={
       )}
     </ScrollArea>
 
-    {/* CUSTOM PROMPT INPUT */}
     <div className="border-t pt-2 mt-2 flex gap-2">
       <textarea
         value={customPrompt}
@@ -838,7 +834,7 @@ else  payload={
       overflow-x-hidden
     "
   >
-    {/* HEADER */}
+   
     <SheetHeader className="px-4 py-3 border-b shrink-0">
       <SheetTitle className="text-sm md:text-lg">
         Submission Details : {problemdata?.title}
@@ -848,12 +844,12 @@ else  payload={
       </SheetDescription>
     </SheetHeader>
 
-    {/* BODY */}
+    
     {selectedsubmission && (
       <ScrollArea className="flex-1 px-4 py-3 overflow-x-hidden">
         <div className="space-y-5 pb-8">
 
-          {/* META */}
+        
           <div className="flex flex-wrap gap-2 text-xs md:text-sm items-center">
             <Badge>{selectedsubmission.language}</Badge>
 
@@ -876,7 +872,7 @@ else  payload={
             </span>
           </div>
 
-          {/* CODE */}
+          
           <div>
             <h3 className="font-semibold text-sm mb-1">
               Submitted Code
@@ -900,7 +896,7 @@ else  payload={
             </pre>
           </div>
 
-          {/* INPUT */}
+          
           {selectedsubmission.input && (
             <div>
               <h3 className="font-semibold text-sm mb-1">
@@ -924,7 +920,7 @@ else  payload={
             </div>
           )}
 
-          {/* OUTPUT */}
+          
           {selectedsubmission.output && (
             <div>
               <h3 className="font-semibold text-sm mb-1">
@@ -948,7 +944,7 @@ else  payload={
             </div>
           )}
 
-          {/* ERROR */}
+       
           {selectedsubmission.error && (
             <div>
               <h3 className="font-semibold text-sm mb-1 text-red-500">

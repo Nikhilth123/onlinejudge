@@ -12,12 +12,12 @@ import { Label } from "@/components/ui/label"
 import { Link, useNavigate } from "react-router-dom"
 import { useState, useContext } from "react"
 import Authcontext from "../Context/Authcontext"
-import { useToast } from "@/hooks/use-toast";
+import {toast} from 'react-toastify'
 
 function Login() {
   const { setUser } = useContext(Authcontext)
   const navigate = useNavigate()
-  const { toast } = useToast()
+  
 
   const [formData, setFormData] = useState({
     email: "",

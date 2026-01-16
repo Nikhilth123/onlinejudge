@@ -7,9 +7,9 @@ const cardHover =
   "transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-xl"
 
 function Home() {
-  // 🔐 Replace this later with real auth state
-  const {user} =useContext(Authcontext)// set to null if not logged in
-//console.log(user.name)
+ 
+  const {user} =useContext(Authcontext)
+
   const displayName = user ? user.name : "Coder"
   const fullText = `Hello ${displayName} 👋`
 
@@ -17,29 +17,29 @@ function Home() {
   const [index, setIndex] = useState(0)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // ✨ Infinite typing animation
+  
   useEffect(() => {
     let timeout
 
     if (!isDeleting && index < fullText.length) {
-      // typing
+    
       timeout = setTimeout(() => {
         setText(fullText.slice(0, index + 1))
         setIndex(index + 1)
       }, 80)
     } else if (!isDeleting && index === fullText.length) {
-      // pause after typing
+      
       timeout = setTimeout(() => {
         setIsDeleting(true)
       }, 1200)
     } else if (isDeleting && index > 0) {
-      // deleting
+    
       timeout = setTimeout(() => {
         setText(fullText.slice(0, index - 1))
         setIndex(index - 1)
       }, 50)
     } else if (isDeleting && index === 0) {
-      // restart typing
+     
       setIsDeleting(false)
     }
 
@@ -49,7 +49,6 @@ function Home() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 space-y-14">
 
-      {/* HERO */}
       <section className="text-center space-y-4">
         <h1 className="text-4xl font-bold tracking-tight min-h-[3rem]">
           {text}
@@ -74,7 +73,7 @@ function Home() {
         </div>
       </section>
 
-      {/* ABOUT PLATFORM */}
+      
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <Card className={cardHover}>
           <CardHeader>
@@ -107,7 +106,6 @@ function Home() {
         </Card>
       </section>
 
-      {/* CTA */}
       <section className="text-center">
         <Card className={cardHover}>
           <CardContent className="py-10 space-y-4">

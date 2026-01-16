@@ -7,9 +7,7 @@ import CreateProblem from './Pages/CreateProblem'
 import EditProblem from './Pages/EditProblem'
 import AdminDashboard from './Pages/AdminDashboard'
 import ProblemDesc2 from './Pages/ProblemDesc2'
-import  Drag from './Pages/Drag'
 import UserProfile from './Pages/UserProfile'
-import { Toaster } from './components/ui/toaster'
 import Login from './Pages/Login'
 import Signup from './Pages/Signup'
 import ProblemDescLayout from './Layouts/ProblemDescLayout'
@@ -22,14 +20,11 @@ console.log('hello chacha');
    <Routes>
     <Route element={<MainLayout></MainLayout>}>
     <Route path='/' element={<Home></Home>}/>
-    <Route path='/problems' element={<Problems></Problems>}/>
-    <Route path='/home'element={<Home></Home>}/>
-    
+    <Route path='/problems' element={<Problems></Problems>}/> 
     <Route path='/createproblem' element={<CreateProblem></CreateProblem>}></Route>
     <Route path='problem/edit/:id' element={<EditProblem></EditProblem>}></Route>
     <Route path='/admindashboard' element={<AdminDashboard></AdminDashboard>}></Route>
-        <Route path='/drag' element={<Drag></Drag>}></Route>
-        <Route path='/profile' element={<UserProfile></UserProfile>}></Route>
+        <Route path='/profile/:id' element={<UserProfile></UserProfile>}></Route>
     </Route>
     <Route element={<ProblemDescLayout></ProblemDescLayout>}>
         <Route path='/problems/:id' element={<ProblemDesc2></ProblemDesc2>}></Route>

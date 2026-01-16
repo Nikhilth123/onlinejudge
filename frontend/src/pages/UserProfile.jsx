@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { useState, useEffect, useContext } from "react";
 import Authcontext from "@/Context/Authcontext";
-import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -13,11 +12,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {toast} from 'react-toastify'
 const cardHover =
   "transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-xl";
 
 function UserProfile() {
-  const { toast } = useToast();
   const { loading } = useContext(Authcontext);
 
   const [user, setUser] = useState(null);
@@ -53,7 +52,7 @@ function UserProfile() {
     const diffYears = Math.floor(diffMonths / 12);
     return `${diffYears}y ago`;
   }
-  /* ================= FETCH USER ================= */
+ 
 
   const fetchUser = async () => {
     try {
@@ -62,33 +61,30 @@ function UserProfile() {
       });
 
       if (!res.ok) {
-        console.log("no user bro ");
         setUser(null);
         return;
       }
 
       const data = await res.json();
-      console.log("userdatahjksbjadfjkdkf:", data);
-      console.log(data.user.profilepic);
+  
       setUser(data.user);
     } catch {
       setUser(null);
     }
   };
 
-  /* ================= FETCH TOTAL SUBMISSIONS ================= */
+
 
   const fetchTotalSubmissions = async () => {
     try {
-      console.log("in fetch ");
       const res = await fetch(
         `${import.meta.env.VITE_BASE_URL}/api/submission/user/totalsubmissions`,
         { credentials: "include" }
       );
-      console.log("here bro is am ");
+
       if (!res.ok) {
         const data = await res.json();
-        console.log("no ok bro:", data);
+ 
         setTotalSubmissions(0);
         return;
       }
@@ -98,13 +94,13 @@ function UserProfile() {
       setTotalSubmissions(data.totalSubmissions);
       setAcceptedSubmissions(data.totalacceptedSubmissions);
       setRecentSubmissions(data.recentsubmissions);
-      console.log("data is:", data);
+      
     } catch {
       setTotalSubmissions(0);
     }
   };
 
-  /* ================= FETCH SOLVED PROBLEMS ================= */
+ 
 
   const fetchSolvedProblems = async () => {
     try {
@@ -112,11 +108,11 @@ function UserProfile() {
         `${import.meta.env.VITE_BASE_URL}/api/user/solvedproblems`,
         { credentials: "include" }
       );
-      console.log("inside solvedproblem");
+    
 
       if (!res.ok) {
         const data = await res.json();
-        console.log("solved problem error:", data);
+   
         toast({
           title: "Error",
           description: "Could not fetch solved problems",
@@ -149,7 +145,7 @@ function UserProfile() {
       });
     }
   };
-  /*===================Edit Profile picture===================*/
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -160,11 +156,10 @@ function UserProfile() {
 
   const EditProfilePicture = async () => {
     if (!imageFile) {
-      console.log("no image file selected");
+     toast.error('select image to upload')
       return;
     }
     if (loadingimage) {
-      console.log("one image is being loaded please wait");
       return;
     }
     setloadingimage(true);
@@ -184,11 +179,9 @@ function UserProfile() {
       const result = await res.json();
 
       if (!res.ok) {
-        console.log(
-          result.message || "Profile picture not uploaded. Try again."
-        );
+      toast.error('server error try again later');
       } else {
-        console.log("Profile picture uploaded successfully!");
+       
          await fetchUser();   
       setPreview(null);     
       setImageFile(null);
@@ -196,7 +189,7 @@ function UserProfile() {
       setopenimagedialog(false);
       setloadingimage(false);
     } catch (err) {
-      console.log(err);
+      
       setloadingimage(false);
     }
   };

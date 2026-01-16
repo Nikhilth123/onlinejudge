@@ -10,7 +10,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
        <ThemeProvider
-      attribute="class"   // 🔥 THIS enables .dark
+      attribute="class"   
       defaultTheme="system"
       enableSystem
     >

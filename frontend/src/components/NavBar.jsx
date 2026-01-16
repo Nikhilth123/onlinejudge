@@ -21,13 +21,16 @@ import {
 import Authcontext from "@/Context/Authcontext"
 import { clearCodeDrafts } from "@/utils/clearcodedraft"
 import { clearlanguage } from "@/utils/clearlanguage"
-import { useToast } from "@/hooks/use-toast";
+import {toast}from 'react-toastify'
 
 function Navbar() {
   const { user, setUser, loading } = useContext(Authcontext)
   const navigate = useNavigate()
-  const { toast } = useToast()
-
+  if(loading)return(
+    <div>Loading....</div>
+  )
+  
+console.log("user:",user._id)
   const isLoggedIn = !!user
   const isAdmin = user?.role === "admin"
 
@@ -73,12 +76,12 @@ function Navbar() {
     <header className="sticky top-0 z-50 bg-background border-b">
       <nav className="mx-auto max-w-6xl h-14 px-4 flex items-center justify-between">
 
-        {/* LOGO */}
+     
         <Link to="/" className="font-bold text-lg tracking-tight">
           OnlineJudge
         </Link>
 
-        {/* DESKTOP LINKS */}
+     
         <div className="hidden md:flex items-center gap-2">
           <NavLink
             to="/"
@@ -127,11 +130,10 @@ function Navbar() {
           )}
         </div>
 
-        {/* RIGHT */}
         <div className="flex items-center gap-3">
           <ThemeToggle />
 
-          {/* MOBILE */}
+         
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -159,7 +161,7 @@ function Navbar() {
                     </>
                   ) : (
                     <>
-                      <Link to="/profile">Profile</Link>
+                      <Link to={`/profile/${user._id}`}>Profile</Link>
                       <button
                         onClick={handleLogout}
                         className="text-left text-red-500"
@@ -173,7 +175,7 @@ function Navbar() {
             </Sheet>
           </div>
 
-          {/* DESKTOP USER */}
+          
           {!isLoggedIn ? (
             <div className="hidden md:flex gap-2">
               <Button variant="ghost" asChild>
@@ -196,7 +198,7 @@ function Navbar() {
 
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
-                    <Link to="/profile">Profile</Link>
+                    <Link to={`/profile/${user?._id}`}>Profile</Link>
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />
