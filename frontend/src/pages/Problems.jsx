@@ -1,140 +1,313 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
-import Authcontext from '../../context/Authcontext';
+import { useState, useEffect, useContext } from "react";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import Authcontext from "../Context/Authcontext";
 
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { MoreVertical } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 function Problems() {
-  const {user}=useContext(Authcontext);
-  const navigate=useNavigate()
+  const { user } = useContext(Authcontext);
+  const isAdmin = user?.role === "admin";
+  const { toast } = useToast();
+
   const [problemData, setProblemData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [difficultyFilter, setDifficultyFilter] = useState('All');
-  const [page,setPage]=useState(1);
-  const [totalpages,settotalpages]=useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [difficultyFilter, setDifficultyFilter] = useState("All");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const handledeleteproblem=async(problemid)=>{
-    try{
-      const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/problems/delete/${problemid}`,{
-        method:'DELETE',
-        credentials:'include'
-      })
-      if(!res.ok){
-        const result=await res.json();
-       
-        toast.error('problem not deleted successfully')
-      }
-      else{
-         const result=await res.json();
-         toast.success('problem deleted successfully');
-         navigate('/problems')
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedProblemId, setSelectedProblemId] = useState(null);
+  const [solvedSet, setSolvedSet] = useState(new Set());
 
-      }
+  /* ---------------- FETCH PROBLEMS ---------------- */
+  const fetchProblems = async () => {
+    try {
+      const res = await fetch(
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/api/problems?page=${page}&limit=2&search=${searchTerm}&difficulty=${difficultyFilter}`,
+        { credentials: "include" }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch problems");
+
+      const data = await res.json();
+      console.log(data);
+      setProblemData(data.problems);
+      setTotalPages(data.totalpages);
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: err.message,
+      });
     }
-    catch(err){
-     
-      toast.error('server error try again');
-    }
+  };
 
-  }
-
-  const fetchProblem = async () => {
-
-    
+  /* ---------------- FETCH SOLVED PROBLEMS ---------------- */
+  const fetchSolvedProblems = async () => {
+    if (!user) return;
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/problems?page=${page}&limit=5&search=${searchTerm}&difficulty=${difficultyFilter}`);
-      if (!res.ok) throw new Error("Failed to fetch problems");
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/user/solvedproblems`,
+        { credentials: "include" }
+      );
+      console.log("Here");
       const data = await res.json();
-      setProblemData(data.problems);
-      settotalpages(data.totalpages);
-     
+      console.log("There");
+      console.log(data);
+      setSolvedSet(new Set(data.solvedProblems.map((p) => p._id)));
     } catch (err) {
-      toast.error("Error: " + err.message);
+      console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchProblem();
-  }, [page,searchTerm,difficultyFilter]);
+    fetchProblems();
+  }, [page, searchTerm, difficultyFilter]);
 
-  
+  useEffect(() => {
+    fetchSolvedProblems();
+  }, [user]);
+
+  /* ---------------- DELETE PROBLEM ---------------- */
+  const handleDeleteConfirm = async () => {
+    if (!selectedProblemId) return;
+
+    try {
+      const res = await fetch(
+        `${
+          import.meta.env.VITE_BASE_URL
+        }/api/problems/delete/${selectedProblemId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        toast({
+          variant: "destructive",
+          title: "Deletion Failed",
+          description: result.message || "Problem not deleted",
+        });
+        return;
+      }
+
+      toast({
+        title: "Problem Deleted ✅",
+      });
+
+      setOpenDeleteDialog(false);
+      fetchProblems();
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Server Error",
+        description: "Please try again later",
+      });
+    }
+  };
 
   return (
-    <div className="p-4 w-4xl mx-auto flex-col items-center justify-center flex-grow ">
-      <h2 className="text-2xl font-bold mb-6">All Problems</h2>
-
-      <div className="flex flex-col sm:flex-row gap-4 mb-6 ">
-        <input
-          type="text"
-          placeholder="Search by title..."
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      {/* 🔍 SEARCH + FILTER */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <Input
+          placeholder="Search problems..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="border border-gray-300 px-4 py-2 rounded w-full sm:w-1/2"
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setPage(1);
+          }}
+          className="max-w-md"
         />
 
-        <select
+        <Select
           value={difficultyFilter}
-          onChange={(e) => setDifficultyFilter(e.target.value)}
-          className="border border-gray-300 px-4 py-2 rounded w-full sm:w-1/3"
+          onValueChange={(value) => {
+            setDifficultyFilter(value);
+            setPage(1);
+          }}
         >
-          <option value="All">All Difficulties</option>
-          <option value="Easy">Easy</option>
-          <option value="Medium">Medium</option>
-          <option value="Hard">Hard</option>
-        </select>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Difficulty" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All">All</SelectItem>
+            <SelectItem value="Easy">Easy</SelectItem>
+            <SelectItem value="Medium">Medium</SelectItem>
+            <SelectItem value="Hard">Hard</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      
-    {problemData.map((problem) => (
-  <div
-    key={problem._id}
-    className="flex items-center justify-between bg-gray-100 hover:bg-gray-700  hover:text-white text-gray-800 px-4 py-3 rounded-md mb-3 transition duration-200 "
-  >
-    <Link to={`/problems/${problem._id}`} className="flex-grow text-left">
-      {problem.title}
-    </Link>
+      {/* 📋 PROBLEMS LIST */}
+      <div className="border rounded-xl overflow-hidden">
+        <Table>
+          <TableBody>
+            {problemData.map((problem) => (
+              <TableRow
+                key={problem._id}
+                className="transition-colors hover:bg-muted/50"
+              >
+                {/* TITLE */}
+                <TableCell className="font-medium">
+                  <Link
+                    to={`/problems/${problem._id}`}
+                    className="hover:underline"
+                  >
+                    {problem.title}
+                  </Link>
+                </TableCell>
 
-   {user&&user.role=='admin'&&(
-    <button
-      onClick={() => navigate(`/problems/edit/${problem._id}`)}
-      className="ml-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-    >
-      Edit
-    </button>
-   )}
-    {user&&user.role=='admin'&&(
-    <button
-      onClick={()=>handledeleteproblem(problem._id)}
-      className="ml-4 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-    >
-      Delete
-    </button>
-   )}
+                {/* DIFFICULTY */}
+                <TableCell className="text-right">
+                  <Badge
+                    variant="outline"
+                    className={
+                      problem.difficulty === "Easy"
+                        ? "border-green-500 text-green-500"
+                        : problem.difficulty === "Medium"
+                        ? "border-yellow-500 text-yellow-500"
+                        : "border-red-500 text-red-500"
+                    }
+                  >
+                    {problem.difficulty}
+                  </Badge>
+                </TableCell>
+
+                {/* STATUS */}
+                <TableCell className="text-right">
+                  {solvedSet.has(problem._id) ? (
+                    <Badge className="bg-green-600 text-white">Solved</Badge>
+                  ) : (
+                    <Badge variant="secondary">Unsolved</Badge>
+                  )}
+                </TableCell>
+
+                {/* ACTIONS (ADMIN ONLY) */}
+                <TableCell className="text-right">
+                  {isAdmin && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link to={`/editproblem/${problem._id}`}>Edit</Link>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => {
+                            setSelectedProblemId(problem._id);
+                            setOpenDeleteDialog(true);
+                          }}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* 🗑 DELETE DIALOG */}
+      <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Problem</DialogTitle>
+            <DialogDescription>This action cannot be undone.</DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setOpenDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/*===================Pagination=======================================*/}
+      <Pagination>
+  <PaginationContent>
+    <PaginationItem>
+      <PaginationPrevious  onClick={() =>
+          page > 1 && setPage(page - 1)
+        }/>
+    </PaginationItem>
     
-  </div>
-))}
+    {Array.from({length:totalPages}).map((_,i)=>{
+      const p=i+1;
+      return(
+        <PaginationItem key={p}>
+          <PaginationLink
+          isActive={p===page}
+          onClick={()=>setPage(p)} 
+          >{p}</PaginationLink>
+          </PaginationItem>
+      )
 
-
-      <div className="flex justify-center gap-2 mt-4">
-  <button
-    onClick={() => setPage((p) => Math.max(p - 1, 1))}
-    disabled={page === 1}
-    className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
-  >
-    Prev
-  </button>
-  <span className="px-3 py-1 bg-gray-100 rounded">Page {page}</span>
-  <button
-    onClick={() => setPage((p) => Math.min(p + 1, totalpages))}
-    disabled={page === totalpages}
-    className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50"
-  >
-    Next
-  </button>
-</div>
-
+    })}
+    <PaginationItem>
+      <PaginationNext onClick={()=>page<totalPages &&setPage(page+1)} />
+    </PaginationItem>
+  </PaginationContent>
+</Pagination>
     </div>
   );
 }

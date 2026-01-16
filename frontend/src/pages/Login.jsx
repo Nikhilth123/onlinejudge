@@ -1,84 +1,156 @@
-// src/pages/Login.jsx
-import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import Authcontext from "../../context/Authcontext.js";
-import {toast} from "react-toastify"
-import {Link} from 'react-router-dom'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Link, useNavigate } from "react-router-dom"
+import { useState, useContext } from "react"
+import Authcontext from "../Context/Authcontext"
+import { useToast } from "@/hooks/use-toast";
 
 function Login() {
-  const { setUser } = useContext(Authcontext);
-  const navigate = useNavigate();
+  const { setUser } = useContext(Authcontext)
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role:"user"
-  });
-  const [error, setError] = useState("");
+    role: "user",
+  })
+
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    })
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
+    if (loading) return
 
-    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/user/login`, {
-      method: "POST",
-      credentials: "include", 
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    try {
+      setLoading(true)
 
-    if (res.ok) {
-      const data = await res.json();
-      setUser(data.user);
-      toast.success("LOgged in Successfully");
-      navigate("/"); 
-    } else {
-      const data = await res.json();
-     toast.error(data.msg);
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/user/login`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      )
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast({
+          variant: "destructive",
+          title: "Login failed",
+          description: data.msg || "Invalid credentials",
+        })
+        return
+      }
+
+      setUser(data.user)
+
+      toast({
+        title: "Logged in successfully 🎉",
+        description: "Welcome back!",
+      })
+
+      navigate("/")
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+      })
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-200">
-      <form onSubmit={handleSubmit} className="bg-yellow-100 p-8 shadow rounded w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <Card className="w-full max-w-md transition-all hover:shadow-xl">
 
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl">
+            Login
+          </CardTitle>
+          <CardDescription>
+            Enter your credentials to access your account
+          </CardDescription>
+        </CardHeader>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full p-2 border mb-4 rounded"
-          required
-        />
+        {/* FORM */}
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full p-2 border mb-6 rounded"
-          required
-        />
-       
+            <div className="space-y-1">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                required
+              />
+            </div>
 
-        <button
-          type="submit"
-          className="bg-gray-600 text-white py-2 px-4 rounded w-full hover:bg-blue-700"
-        >
-          Login
-        </button>
-         <div>Don't have account <Link to='/signup' className="text-blue-600 underline">Signup</Link></div>
-      </form>
+            <div className="space-y-1">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Login"}
+            </Button>
+
+          </CardContent>
+        </form>
+
+        <CardFooter className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">
+            Don&apos;t have an account?
+          </p>
+          <Button variant="link" asChild className="p-0">
+            <Link to="/signup">
+              Create an account
+            </Link>
+          </Button>
+        </CardFooter>
+
+      </Card>
     </div>
-  );
+  )
 }
 
-export default Login;
+export default Login

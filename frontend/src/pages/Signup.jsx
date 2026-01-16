@@ -1,101 +1,170 @@
-// src/pages/Login.jsx
-import React, { useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Authcontext from "../../context/Authcontext.js";
-import {toast} from "react-toastify"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Link, useNavigate } from "react-router-dom"
+import { useContext, useState } from "react"
+import  Authcontext  from "../Context/Authcontext" // adjust path if needed
+import { useToast } from "@/hooks/use-toast";
 
 function Signup() {
-  const { setUser } = useContext(Authcontext);
-  const navigate = useNavigate();
+  const { setUser } = useContext(Authcontext)
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   const [formData, setFormData] = useState({
-    name:"",
+    name: "",
     email: "",
     password: "",
-    role:"user"
-  });
-  const [error, setError] = useState("");
+    role: "user",
+  })
+
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    })
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try{
-    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/user/signup`, {
-      method: "POST",
-      credentials: "include", 
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
+    e.preventDefault()
+    if (loading) return
 
-    if (res.ok) {
-      const data = await res.json();
-      setUser(data.user);
-      toast.success(data.msg);
-      navigate("/"); 
-    } else {
-      const data = await res.json();
-      toast.error(data.msg);
+    try {
+      setLoading(true)
+
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/user/signup`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      )
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast({
+          variant: "destructive",
+          title: "Signup failed",
+          description: data.msg || "Something went wrong",
+        })
+        return
+      }
+
+      setUser(data.user)
+
+      toast({
+        title: "Account created 🎉",
+        description: data.msg || "Welcome to the platform",
+      })
+
+      navigate("/")
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+      })
+    } finally {
+      setLoading(false)
     }
   }
-  catch(err){
-    toast.error("something went wrong please try again")
-  }
-  };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-200">
-      <form onSubmit={handleSubmit} className="bg-yellow-100 p-8 shadow rounded w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Signup</h2>
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <Card className="w-full max-w-md transition-all hover:shadow-xl">
 
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl">
+            Create an account
+          </CardTitle>
+          <CardDescription>
+            Sign up to start solving coding problems
+          </CardDescription>
+        </CardHeader>
 
+        {/* FORM */}
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
 
-         <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full p-2 border mb-4 rounded"
-          required
-        />
+            <div className="space-y-1">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Your full name"
+                required
+              />
+            </div>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full p-2 border mb-4 rounded"
-          required
-        />
+            <div className="space-y-1">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                required
+              />
+            </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full p-2 border mb-6 rounded"
-          required
-        />
-      
+            <div className="space-y-1">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+              />
+            </div>
 
-        <button
-          type="submit"
-          className="bg-gray-600 text-white py-2 px-4 rounded w-full hover:bg-blue-700"
-        >
-          signup
-        </button>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? "Creating account..." : "Sign Up"}
+            </Button>
 
-        <div>Already have account <Link to='/login' className="text-blue-600 underline">Login</Link></div>
-      </form>
-      
+          </CardContent>
+        </form>
+
+        <CardFooter className="flex flex-col gap-2">
+          <p className="text-sm text-muted-foreground">
+            Already have an account?
+          </p>
+          <Button variant="link" asChild className="p-0">
+            <Link to="/login">
+              Login here
+            </Link>
+          </Button>
+        </CardFooter>
+
+      </Card>
     </div>
-  );
+  )
 }
 
-export default Signup;
+export default Signup

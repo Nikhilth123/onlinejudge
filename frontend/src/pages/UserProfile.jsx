@@ -1,43 +1,151 @@
-import React, { useState, useContext, useEffect } from "react";
-import Authcontext from "../../context/Authcontext";
-import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { useState, useEffect, useContext } from "react";
+import Authcontext from "@/Context/Authcontext";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+const cardHover =
+  "transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-xl";
 
-export default function ProfilePage() {
-  
-const [user,setuser]=useState(null);
-  const [solvedproblem, setsolvedproblem] = useState([]);
-  const [preview, setPreview] = useState(null);
+function UserProfile() {
+  const { toast } = useToast();
+  const { loading } = useContext(Authcontext);
+
+  const [user, setUser] = useState(null);
+  const [solvedproblem, setSolvedProblem] = useState([]);
+  const [easyProblem, setEasyProblem] = useState(0);
+  const [mediumProblem, setMediumProblem] = useState(0);
+  const [hardProblem, setHardProblem] = useState(0);
+  const [totalsubmissions, setTotalSubmissions] = useState(0);
+  const [acceptedSubmissions, setAcceptedSubmissions] = useState(0);
+  const [recentSubmissions, setRecentSubmissions] = useState([]);
+   const [preview, setPreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-const {loading}=useContext(Authcontext)
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      const imageUrl = URL.createObjectURL(file);
-      setPreview(imageUrl);
+function showtime(prevdate){
+  const presentdate=new Date();
+  const pastdate=new Date(prevdate);
+  const diffSeconds=Math.floor((presentdate-pastdate)/1000);
+  if (diffSeconds < 60) return `${diffSeconds}s ago`;
+
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 30) return `${diffDays}d ago`;
+
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths < 12) return `${diffMonths}mo ago`;
+
+  const diffYears = Math.floor(diffMonths / 12);
+  return `${diffYears}y ago`;
+}
+  /* ================= FETCH USER ================= */
+
+  const fetchUser = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/user/me`,
+        { credentials: "include" }
+      );
+
+      if (!res.ok) {
+        setUser(null);
+        return;
+      }
+
+      const data = await res.json();
+      setUser(data.user);
+    } catch {
+      setUser(null);
     }
   };
-const fetchdata=async()=>{
- try{
-    const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/user/me`,{
-      method: "GET",
-      credentials: "include", 
-    })
-    if(res.ok){
-      const data=await res.json();
-     
-      setuser(data.user);
 
-    } 
-    else setuser(null);
-  }
-  catch(err){
-    setuser(null);
-  }
-}
-  const uploadProfilePic = async () => {
-    if (!selectedFile) {
+  /* ================= FETCH TOTAL SUBMISSIONS ================= */
+
+  const fetchTotalSubmissions = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/submission/user/totalsubmissions`,
+        { credentials: "include" }
+      );
+console.log("here bro ");
+      if (!res.ok) {
+        const data = await res.json();
+        console.log("no ok bro:",data);
+        setTotalSubmissions(0);
+        return;
+      }
+
+      const data = await res.json();
+     
+      setTotalSubmissions(data.totalSubmissions);
+      setAcceptedSubmissions(data.acceptedSubmissions);
+
+    } catch {
+      setTotalSubmissions(0);
+    }
+  };
+
+  /* ================= FETCH SOLVED PROBLEMS ================= */
+
+  const fetchSolvedProblems = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/user/solvedproblems`,
+        { credentials: "include" }
+      );
+      console.log("inside solvedproblem");
+
+      if (!res.ok) {
+        const data =await res.json();
+        console.log('solved problem error:',data);
+        toast({
+          title: "Error",
+          description: "Could not fetch solved problems",
+          variant: "error",
+        });
+        return;
+      }
+
+      const result = await res.json();
+      setSolvedProblem(result.solvedProblems);
+
+      let e = 0,
+        m = 0,
+        h = 0;
+
+      for (let i = 0; i < result.solvedProblems.length; i++) {
+        if (result.solvedProblems[i].difficulty === "Easy") e++;
+        else if (result.solvedProblems[i].difficulty === "Medium") m++;
+        else h++;
+      }
+
+      setEasyProblem(e);
+      setMediumProblem(m);
+      setHardProblem(h);
+    } catch {
+      toast({
+        title: "Server Error",
+        description: "Failed to load solved problems",
+        variant: "error",
+      });
+    }
+  };
+/*===================Edit Profile===================*/
+const EditProfilePicture=async()=>{
+  if (!selectedFile) {
       toast.error("No image selected.");
       return;
     }
@@ -63,94 +171,224 @@ const fetchdata=async()=>{
       console.log(err);
       toast.error("Server error. Try again later.");
     }
-  };
+}
 
-  const fetchsolvedproblem = async () => {
+  /* ================= FETCH RECENT SUBMISSIONS ================= */
+
+  const fetchRecentSubmissions = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_BASE_URL}/api/user/solvedproblems`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/submission/user/recentsubmissions`,
+        { credentials: "include" }
+      );
 
-      if (res.ok) {
-        const result = await res.json();
-        setsolvedproblem(result.solvedProblems);
-       
-      } else {
-        const result = await res.json();
-        toast.error(result.msg || "Could not fetch solved problems.");
+      if (!res.ok) {
+        const data=await res.json();
+        console.log('recent submission error:',data);
+        setRecentSubmissions([]);
+        return;
       }
-    } catch (err) {
-      toast.error("Server error");
+
+      const data = await res.json();
+      setRecentSubmissions(data.recentsubmissions);
+    } catch {
+      setRecentSubmissions([]);
     }
   };
 
   useEffect(() => {
-    fetchsolvedproblem();
-    fetchdata();
+    fetchUser();
+    fetchSolvedProblems();
+    fetchRecentSubmissions();
+    fetchTotalSubmissions();
   }, []);
 
-  if (loading) return <div className="text-center mt-10 flex-grow">Loading...</div>;
-  if (!user) return <div className="text-center mt-10 flex-grow">Please log in</div>;
+  if (loading) return null;
 
   return (
-    <div className="flex-grow bg-gray-100 flex flex-col py-6 items-center">
-      <div className="bg-white p-6 rounded-2xl shadow-xl w-[90%] md:w-[70%] flex flex-col md:flex-row items-center md:items-start gap-6">
-        
-        {/* Profile Picture */}
-        <div className="flex flex-col items-center">
-          <img
-            src={preview || user.profilepic || "/default_img.jpg"}
-            alt="Profile"
-            className="w-48 h-48 object-cover rounded-xl border-2"
-          />
+    <div className="max-w-6xl mx-auto px-4 py-10 space-y-10">
 
-          <label className="mt-3 bg-indigo-500 text-white px-3 py-1 rounded cursor-pointer text-sm">
-            Change
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="hidden"
-            />
-          </label>
+      {/* USER HEADER */}
+      <Card className={cardHover}>
+        <CardContent className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+          <Avatar className="h-24 w-24">
+            {user?.profilePic && user.profilePic.trim() !== "" && (
+              <AvatarImage
+                src={user.profilePic}
+                alt={user.name}
+              />
+            )}
 
-          <button
-            onClick={uploadProfilePic}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-2"
-          >
-            Upload
-          </button>
-        </div>
+            <AvatarFallback className="text-2xl font-bold">
+              {user?.name?.charAt(0).toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
 
-        {/* Profile Details */}
-        <div className="flex flex-col justify-center text-center md:text-left w-full">
-          <h1 className="text-3xl font-bold mb-4">Hello {user.name}</h1>
-          <h2 className="text-gray-700 text-xl mb-2">Total Questions: {user.totalQuestions}</h2>
-          <p className="text-green-600 text-xl">Solved Questions: {solvedproblem.length}</p>
-        </div>
+          <div className="flex-1 space-y-2 text-center sm:text-left">
+            <h1 className="text-2xl font-bold">
+              {user?.name || "Loading..."}
+            </h1>
+
+            <p className="text-sm text-muted-foreground">
+              {user?.email || "Loading..."}
+            </p>
+
+            <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+              <Badge variant="outline">
+                {user?.role || "User"}
+              </Badge>
+            </div>
+          </div>
+
+          <Dialog>
+  <DialogTrigger asChild>
+    <Button variant="outline">Edit Profile Pic</Button>
+  </DialogTrigger>
+
+  <DialogContent className="sm:max-w-[400px]">
+    <DialogHeader>
+      <DialogTitle>Update Profile Picture</DialogTitle>
+    </DialogHeader>
+
+   <div className="flex flex-col items-center gap-4">
+
+  {/* Preview */}
+  <div className="w-32 h-32 rounded-full overflow-hidden border">
+    <img
+      src={preview || user.avatar}
+      alt="profile"
+      className="w-full h-full object-cover"
+    />
+  </div>
+
+  {/* Upload input */}
+  <label className="cursor-pointer text-sm text-blue-600">
+    Choose Image
+    <input
+      type="file"
+      accept="image/*"
+      hidden
+      onChange={handleImageChange}
+    />
+  </label>
+
+  {/* Submit */}
+  <Button
+    onClick={handleUpload}
+    disabled={loading || !imageFile}
+    className="w-full"
+  >
+    {loading ? "Uploading..." : "Save"}
+  </Button>
+
+</div>
+
+  </DialogContent>
+</Dialog>
+
+{/* 
+          <Button variant="outline" onClick={openeditprofile}>
+            Edit Profile Pic
+          </Button> */}
+        </CardContent>
+      </Card>
+
+      {/* STATS */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <Card className={cardHover}>
+          <CardHeader>
+            <CardTitle>Total Problems Solved</CardTitle>
+          </CardHeader>
+          <CardContent className="text-3xl font-bold">
+            {solvedproblem.length}
+          </CardContent>
+        </Card>
+
+        <Card className={cardHover}>
+          <CardHeader>
+            <CardTitle>Total Submissions</CardTitle>
+          </CardHeader>
+          <CardContent className="text-3xl font-bold">
+            {totalsubmissions}
+          </CardContent>
+        </Card>
+
+        <Card className={cardHover}>
+          <CardHeader>
+            <CardTitle>Accepted Submissions</CardTitle>
+          </CardHeader>
+          <CardContent className="text-3xl font-bold">
+            {acceptedSubmissions}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Solved Problems */}
-      <div className="w-[90%] md:w-[70%] mt-8">
-        {solvedproblem.length > 0 ? (
-          <>
-            <h1 className="text-xl font-bold text-green-600 mb-4">Solved Problems</h1>
-            {solvedproblem.map((problem) => (
-              <div
-                key={problem._id}
-                className="flex items-center justify-between bg-gray-200 hover:bg-gray-700 hover:text-white px-4 py-3 rounded-md mb-3 transition duration-200"
-              >
-                <Link to={`/problems/${problem._id}`} className="w-full text-left">
-                  {problem.title}
-                </Link>
-              </div>
-            ))}
-          </>
-        ) : (
-          <h1 className="text-xl text-center mt-4">No problems solved yet.</h1>
-        )}
-      </div>
+      {/* SOLVED BREAKDOWN */}
+      <Card className={cardHover}>
+        <CardHeader>
+          <CardTitle>Solved Problems by Difficulty</CardTitle>
+        </CardHeader>
+
+        <CardContent className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <p className="text-green-500 font-semibold">Easy</p>
+            <p className="text-xl font-bold">{easyProblem}</p>
+          </div>
+          <div>
+            <p className="text-yellow-500 font-semibold">Medium</p>
+            <p className="text-xl font-bold">{mediumProblem}</p>
+          </div>
+          <div>
+            <p className="text-red-500 font-semibold">Hard</p>
+            <p className="text-xl font-bold">{hardProblem}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* RECENT SUBMISSIONS */}
+      <Card className={cardHover}>
+        <CardHeader>
+          <CardTitle>Recent Submissions</CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          <Table>
+            <TableBody>
+              {recentSubmissions.length === 0 && (
+                <TableRow>
+                  <TableCell className="text-center text-muted-foreground">
+                    No recent submissions
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {recentSubmissions.map((submission) => (
+                <TableRow
+                  key={submission._id}
+                  className="hover:bg-muted/40 transition-colors"
+                >
+                  <TableCell className="font-medium" aschild>
+                    {submission.problemId.title}
+                  </TableCell>
+
+                  <TableCell>
+                    <Badge variant="secondary">
+                      {submission.status}
+                    </Badge>
+                  </TableCell>
+
+                  <TableCell className="text-right text-sm text-muted-foreground">
+                    {showtime(submission.createdAt)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }
+
+export default UserProfile;
