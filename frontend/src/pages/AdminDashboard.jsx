@@ -52,7 +52,7 @@ function AdminDashboard() {
   const [totalUser, setTotaluser] = useState(0);
   const [totalProblems, setTotalProblems] = useState(0);
 
-  /* ================= GRANT ADMIN ================= */
+
 
   const handlegrantadminaccess = async () => {
     setOpenAdminDialog(false);
@@ -92,7 +92,7 @@ function AdminDashboard() {
     }
   };
 
-  /* ================= FETCH RECENT PROBLEMS ================= */
+
 
   const fetchrecentlycreatedProblems = async () => {
     try {
@@ -121,7 +121,7 @@ function AdminDashboard() {
     }
   };
 
-  /* ================= FETCH TOTALS ================= */
+ 
 
   const fetchtotalproblemsanduser = async () => {
     try {
@@ -165,7 +165,7 @@ function AdminDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-10">
-      {/* 🔥 STATS */}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="hover:shadow-xl transition-all hover:-translate-y-0.5">
           <CardHeader>
@@ -182,7 +182,7 @@ function AdminDashboard() {
         </Card>
       </div>
 
-      {/* 🔥 ACTION CARDS */}
+     
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link to="/createproblem">
           <Card className="group cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-primary">
@@ -215,7 +215,6 @@ function AdminDashboard() {
         </Card>
       </div>
 
-      {/* 🔥 TABLE */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">
           Recent Created Problems
@@ -279,7 +278,7 @@ function AdminDashboard() {
         </Card>
       </div>
 
-      {/* 🔥 DELETE DIALOG */}
+  
       <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
         <DialogContent>
           <DialogHeader>
@@ -306,7 +305,7 @@ function AdminDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* 🔥 ADMIN DIALOG */}
+     
       <Dialog open={openAdminDialog} onOpenChange={setOpenAdminDialog}>
         <DialogContent>
           <DialogHeader>
