@@ -39,6 +39,7 @@ import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { ChevronDown,ChevronUp } from "lucide-react";
+import {toast} from 'react-toastify'
 function ProblemDesc2() {
   const [code, setCode] = useState("");
   const [input, setInput] = useState("");
@@ -59,6 +60,7 @@ const[submissiondata,setsubmissiondata]=useState([]);
     const [selectedsubmission,setselectedsubmission]=useState(null)
 const [customPrompt, setCustomPrompt] = useState("");
 const [activeAiTask, setActiveAiTask] = useState(null);
+const navigate=useNavigate();
 const fetchproblemdata=async()=>{
   try{
   const res=await fetch(`${import.meta.env.VITE_BASE_URL}/api/problems/${id}`, {
@@ -67,9 +69,9 @@ const fetchproblemdata=async()=>{
         headers: { 'Content-Type': 'application/json' },
       })
       const problemdata=await res.json();
-      console.log("problem data:",problemdata);
+      
       if(!res.ok){
-        console.log(problemdata.msg);
+        toast.error(problemdata.msg)
       }
       else{
           setproblemdata(problemdata)
@@ -77,7 +79,7 @@ const fetchproblemdata=async()=>{
       }
     }
     catch(err){
-      console.log(err);
+      toast.error(err.msg)
     }
 }
  function handleClearOutput(){
@@ -85,8 +87,8 @@ const fetchproblemdata=async()=>{
  }
 const handleRun=async()=>{
 if(!user){
-  console.log('login to run code');
-  useNavigate('/login')
+  toast.error('login to run code');
+  navigate('/login')
   return;
 }
   if(loading)return;
@@ -104,9 +106,9 @@ if(!user){
         body: JSON.stringify(payload),
       })
       const result=await res.json();
-      console.log(result);
+      
       if(!res.ok){
-        console.log(result.msg);
+       toast.error(result.msg)
         setloading(false);
       }
       else{
@@ -115,18 +117,18 @@ if(!user){
       }
   }
   catch(err){
-    console.log(err);
+    toast.error(err.msg)
     setloading(false);
   }
   
 }
 const handleSubmit=async()=>{
 if(!user){
-  console.log('login to submit the code');
-  useNavigate('/login');
+  toast.error('Login to run code');
+  navigate('/login');
 }
 if(loading){
-  console.log('loading not set to false')
+  toast.error('one submission is in queue wait')
   return;
 }
 setloading(true);
@@ -143,12 +145,12 @@ try{
     })
     const result=await res.json();
     if(!res.ok){
-      console.log(result.msg)
+      toast.error(result.msg)
       setloading(false);
       return;
     }
     else{
-      console.log(result);
+      
       setOutput(result)
       setloading(false)
 
@@ -156,7 +158,7 @@ try{
   
 }
 catch(err){
-  console.log(err);
+  toast.error(err.msg)
   setloading(false);
 }
 }
@@ -171,18 +173,18 @@ const handlesubmissiondetails=async()=>{
 
             const result=await res.json();
             
-            console.log(result.msg)
+            toast.error(result.msg)
         }
         else{
             const result=await res.json();
           
-            console.log(result)
+          
             setsubmissiondata(result);
             
                 
         }
     }catch(err){
-        console.log(err)
+        toast.error(err.msg)
        
     }
 }
@@ -206,12 +208,12 @@ const handleairesponse=async(payload)=>{
       })
       if(!res.ok){
          const result=await res.json()
-       console.log('Ai result error:',result);
+       toast.error(result.msg)
 
       }
       else{
       const result=await res.json()
-     console.log(result);
+    
       if(prompt!='boilerplate')
       setairesponse(result)
     else setCode(result);
@@ -219,7 +221,7 @@ const handleairesponse=async(payload)=>{
 
     }
     catch(err){
-      console.log(err);
+      toast.error(err.msg)
 
     }
     
@@ -248,7 +250,7 @@ const handleairesponse=async(payload)=>{
 
     useEffect(() => {
     const loadDraft = async () => {
-      console.log(localkey)
+      
       const local = localStorage.getItem(localkey);
       setCode(local || '');
 
@@ -293,12 +295,12 @@ const handleCustomPrompt = () => {
 
 
 const triggerAi = async (task) => {
-  console.log('trigger ai called bro')
+  
   if (airesponseloading){
-    console.log('yes here ')
+  
     return;
   }
-  console.log('here reached ')
+  
   let payload;
   if(customPrompt)payload={task:task}
 else  payload={
@@ -309,14 +311,14 @@ else  payload={
       task:task
     }
   setOpenAiSidebar(true);
-  console.log('jfsdfsd')
+  
   setairesponseloading(true);
-  console.log('jbfhdsfjksdkfsdkjfsds')
+  
   setActiveAiTask(task);
   setairesponse(null);
 
   try {
-    console.log('hwllo i am here ')
+    
     await handleairesponse(payload);
   } finally {
     setairesponseloading(false);
@@ -469,8 +471,8 @@ else  payload={
     </div>
 
     <ScrollArea className="h-[160px] border rounded p-2">
-     {(output.verdict=='Success'||output.verict=='Accepted')&& <h3 className="font-semibold text-green-700">{output.verdict}</h3>}
-     {(output.verdict!='Success'||output.verdict!='Accepted')&&<h3 className="font-semibold text-red-500">{output.verdict}</h3>}
+     {(output.verdict=='Success'||output.verdict=='Accepted')&& <h3 className="font-semibold text-green-700">{output.verdict}</h3>}
+     {(output.verdict!='Success'&& output.verdict!='Accepted')&&<h3 className="font-semibold text-red-500">{output.verdict}</h3>}
 
       {output.error && (
         <p className="text-red-500 whitespace-pre-wrap">
@@ -727,8 +729,8 @@ else  payload={
     </div>
 
     <ScrollArea className="h-[160px] border rounded p-2">
-     {(output.verdict=='Success'||output.verict=='Accepted')&& <h3 className="font-semibold text-green-700">{output.verdict}</h3>}
-     {(output.verdict!='Success'||output.verdict!='Accepted')&&<h3 className="font-semibold text-red-500">{output.verdict}</h3>}
+     {(output.verdict=='Success'||output.verdict=='Accepted')&& <h3 className="font-semibold text-green-700">{output.verdict}</h3>}
+     {(output.verdict!='Success'&& output.verdict!='Accepted')&&<h3 className="font-semibold text-red-500">{output.verdict}</h3>}
 
       {output.error && (
         <p className="text-red-500 whitespace-pre-wrap">

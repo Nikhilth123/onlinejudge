@@ -1,23 +1,23 @@
 [
     {
         "input": "5\n3 1 4 5 2",
-        "Output": "1 2 3 4 5"
+        "output": "1 2 3 4 5"
     },
     {
         "input": "3\n10 7 8",
-        "Output": "7 8 10"
+        "output": "7 8 10"
     },
     {
         "input": "6\n9 6 2 4 3 1",
-        "Output": "1 2 3 4 6 9"
+        "output": "1 2 3 4 6 9"
     },
     {
         "input": "4\n5 5 5 5",
-        "Output": "5 5 5 5"
+        "output": "5 5 5 5"
     },
     {
         "input": "1\n100",
-        "Output": "100"
+        "output": "100"
     }
 ]
 

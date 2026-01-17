@@ -94,25 +94,13 @@ function CreateProblem() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast({
-          title: "Error",
-          description: data.msg || "Failed to create problem",
-          variant: "error",
-        });
+        toast(data.msg);
       } else {
-        toast({
-          title: "Success",
-          description: "Problem added successfully",
-          variant: "success",
-        });
+        toast('problem added successfully');
         navigate("/problems");
       }
     } catch (err) {
-      toast({
-        title: "Network Error",
-        description: err.message,
-        variant: "error",
-      });
+      toast(err.msg);
     }
   };
 
@@ -172,6 +160,7 @@ function CreateProblem() {
             <ScrollArea>
               <TabsList className="w-max">
                 <TabsTrigger value="description">Description</TabsTrigger>
+                 <TabsTrigger value="tags">Tags</TabsTrigger>
                 <TabsTrigger value="input">Input</TabsTrigger>
                 <TabsTrigger value="output">Output</TabsTrigger>
                 <TabsTrigger value="examples">Examples</TabsTrigger>
@@ -182,13 +171,22 @@ function CreateProblem() {
 
             <TabsContent value="description" className="pt-4">
               <Textarea
+              value={form.description}
                 name="description"
                 onChange={handleChange}
               />
             </TabsContent>
-
+            {/* /*njdnjknjkf*/  }
+              <TabsContent value="tags" className="pt-4">
+              <Textarea
+              value={form.tags}
+                name="tags"
+                onChange={handleChange}
+              />
+            </TabsContent>
             <TabsContent value="input" className="pt-4">
               <Textarea
+              value={form.inputFormat}
                 name="inputFormat"
                 onChange={handleChange}
               />
@@ -196,6 +194,7 @@ function CreateProblem() {
 
             <TabsContent value="output" className="pt-4">
               <Textarea
+              value={form.outputFormat}
                 name="outputFormat"
                 onChange={handleChange}
               />
@@ -203,17 +202,21 @@ function CreateProblem() {
 
             <TabsContent value="examples" className="pt-4">
               <Textarea
+              value={form.sampleInput}
                 name="sampleInput"
                 onChange={handleChange}
               />
               <Textarea
+              value={form.sampleOutput}
                 name="sampleOutput"
                 onChange={handleChange}
+                className='my-2'
               />
             </TabsContent>
 
             <TabsContent value="constraints" className="pt-4">
               <Textarea
+              value={form.constraints}
                 name="constraints"
                 onChange={handleChange}
               />
@@ -267,10 +270,10 @@ function CreateProblem() {
 
           <Label>Expected Output</Label>
           <Textarea
-            value={tc.output}
+            value={tc.Output}
             onChange={(e) => {
               const updated = [...form.testCases];
-              updated[index].output = e.target.value;
+              updated[index].Output = e.target.value;
               setForm((prev) => ({ ...prev, testCases: updated }));
             }}
           />
@@ -293,7 +296,7 @@ function CreateProblem() {
       onClick={() =>
         setForm((prev) => ({
           ...prev,
-          testCases: [...prev.testCases, { input: "", output: "" }],
+          testCases: [...prev.testCases, { input: "", Output: "" }],
         }))
       }
     >

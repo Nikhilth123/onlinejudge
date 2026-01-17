@@ -46,6 +46,7 @@ export const getProblemById = async (req, res) => {
 }
 
 export const addProblem = async (req, res) => {
+  console.log("Received request to add problem");
   const { title, description, difficulty,tags, sampleInput,sampleOutput, inputFormat,outputFormat,constraints } = req.body;
   let testCases=[];
 
@@ -55,6 +56,7 @@ export const addProblem = async (req, res) => {
       testCases=JSON.parse(filedata)
     }
     catch(err){
+      console.log('Error parsing test cases file:', err);
       return res.status(400).json({msg:"invalid testcases file"});
     }
   }
@@ -63,10 +65,12 @@ export const addProblem = async (req, res) => {
       testCases=JSON.parse(req.body.testCases);
     }
     catch(err){
+      console.log('Error parsing test cases from body:', err);
       return res.status(400).json({msg:"Invalid testcases json string "});
     }
   }
   else{
+    console.log("No testcases provided");
     return res.status(400).json({msg:"Missing Testcases"});
   }
 
@@ -82,13 +86,15 @@ export const addProblem = async (req, res) => {
     res.status(201).json({msg:"problem created successfully",problem:newProblem});
   } catch (error) {
     if(error.name === "ValidationError"){
+      console.log("Validation error:", error);
        const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({ msg: "Validation error", errors });
     }
        if (error.code === 11000) {
+        console.log("Duplicate title error:", error);
       return res.status(400).json({ msg: "Title already exists" });
     }
-
+    console.log("Error adding problem:", error);
     res.status(500).json({ msg: "Server error", error: error.message });
   }
 }

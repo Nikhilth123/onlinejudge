@@ -11,10 +11,9 @@ import UserProfile from './Pages/UserProfile'
 import Login from './Pages/Login'
 import Signup from './Pages/Signup'
 import ProblemDescLayout from './Layouts/ProblemDescLayout'
-import { ToastContainer } from 'react-toastify';
+
 function App() {
   
-console.log('hello chacha');
   return (
    <BrowserRouter>
    <Routes>
@@ -32,7 +31,6 @@ console.log('hello chacha');
     <Route path='/login' element={<Login></Login>}></Route>
     <Route path='/signup' element={<Signup></Signup>}></Route>
    </Routes>
-       <ToastContainer />
    </BrowserRouter>
   )
 }

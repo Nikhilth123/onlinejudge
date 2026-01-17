@@ -5,7 +5,7 @@ import App from './App.jsx'
 import { ThemeProvider } from 'next-themes'
 import { AuthProvider } from '../src/Context/AuthcontextProvider'
 import 'react-toastify/dist/ReactToastify.css';
-
+import ThemeToastContainer from './components/ThemeToastContainer'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
@@ -16,7 +16,7 @@ createRoot(document.getElementById('root')).render(
     >
     
     <App />
-    
+       <ThemeToastContainer />
     </ThemeProvider>
     </AuthProvider>
   </StrictMode>,

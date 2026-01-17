@@ -9,7 +9,7 @@ const router= express.Router();
 
 router.get('/', getAllProblems);
 router.get('/:id',getProblemById);
-router.post('/addproblem',  upload.single("testCasesFile"), addProblem,);
-router.put('/edit/:id',updateproblem,);
+router.post('/addproblem',  upload.single("testCasesFile"), adminmiddlewares,addProblem,);
+router.put('/edit/:id',adminmiddlewares,updateproblem,);
 router.delete('/delete/:id',adminmiddlewares, deleteproblem);
 export default router;

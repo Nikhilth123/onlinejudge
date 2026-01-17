@@ -30,7 +30,6 @@ function Navbar() {
     <div>Loading....</div>
   )
   
-console.log("user:",user._id)
   const isLoggedIn = !!user
   const isAdmin = user?.role === "admin"
 

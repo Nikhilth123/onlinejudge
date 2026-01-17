@@ -113,11 +113,7 @@ function UserProfile() {
       if (!res.ok) {
         const data = await res.json();
    
-        toast({
-          title: "Error",
-          description: "Could not fetch solved problems",
-          variant: "error",
-        });
+        toast(data.msg);
         return;
       }
 
@@ -137,12 +133,8 @@ function UserProfile() {
       setEasyProblem(e);
       setMediumProblem(m);
       setHardProblem(h);
-    } catch {
-      toast({
-        title: "Server Error",
-        description: "Failed to load solved problems",
-        variant: "error",
-      });
+    } catch(err) {
+      toast(err.msg);
     }
   };
 

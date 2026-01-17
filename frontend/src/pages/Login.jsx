@@ -56,28 +56,18 @@ function Login() {
       const data = await res.json()
 
       if (!res.ok) {
-        toast({
-          variant: "destructive",
-          title: "Login failed",
-          description: data.msg || "Invalid credentials",
-        })
-        return
+        toast(data.msg)
+        
+        return;
       }
 
       setUser(data.user)
 
-      toast({
-        title: "Logged in successfully 🎉",
-        description: "Welcome back!",
-      })
+      toast('logged in successfully')
 
       navigate("/")
     } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-      })
+      toast(err.msg)
     } finally {
       setLoading(false)
     }

@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 
 import { MoreVertical } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import {toast} from 'react-toastify'
 import {
   Pagination,
   PaginationContent,
@@ -45,7 +45,7 @@ import {
 function Problems() {
   const { user } = useContext(Authcontext);
   const isAdmin = user?.role === "admin";
-  const { toast } = useToast();
+  
 
   const [problemData, setProblemData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,18 +67,13 @@ function Problems() {
         { credentials: "include" }
       );
 
-      if (!res.ok) throw new Error("Failed to fetch problems");
+      if (!res.ok) toast.error('failed to fetch problems');
 
       const data = await res.json();
-     
       setProblemData(data.problems);
       setTotalPages(data.totalpages);
     } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: err.message,
-      });
+      toast(err.msg);
     }
   };
 
@@ -125,26 +120,16 @@ function Problems() {
       const result = await res.json();
 
       if (!res.ok) {
-        toast({
-          variant: "destructive",
-          title: "Deletion Failed",
-          description: result.message || "Problem not deleted",
-        });
+        toast(result.msg);
         return;
       }
 
-      toast({
-        title: "Problem Deleted ✅",
-      });
+      toast('problem deleted successfully');
 
       setOpenDeleteDialog(false);
       fetchProblems();
     } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Server Error",
-        description: "Please try again later",
-      });
+      toast(err.msg);
     }
   };
 

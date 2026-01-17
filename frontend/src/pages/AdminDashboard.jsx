@@ -39,10 +39,10 @@ import {
 } from "@/components/ui/dialog";
 
 import { MoreVertical, Plus } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import {toast} from 'react-toastify'
 
 function AdminDashboard() {
-  const { toast } = useToast();
+ 
 
   const [email, setEmail] = useState("");
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -70,25 +70,13 @@ function AdminDashboard() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast({
-          title: "Error",
-          description: data.message || "Failed to update role",
-          variant: "error",
-        });
+        toast(`Failed to upload role: ${data.msg}`);
       } else {
-        toast({
-          title: "Success",
-          description: "Admin role granted successfully",
-          variant: "success",
-        });
+        toast('Updated to admin successfully');
         setEmail("");
       }
-    } catch {
-      toast({
-        title: "Server Error",
-        description: "Try again later",
-        variant: "error",
-      });
+    } catch(err){
+      toast('server Error:',err.msg);
     }
   };
 
@@ -104,20 +92,12 @@ function AdminDashboard() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast({
-          title: "Error",
-          description: "Error in Fetching Recent Problems",
-          variant: "error",
-        });
+        toast(data.msg);
       } else {
         setRecentProblemsData(data);
       }
-    } catch {
-      toast({
-        title: "Server Error",
-        description: "Try again later",
-        variant: "error",
-      });
+    } catch(err) {
+      toast(err.msg);
     }
   };
 
@@ -133,23 +113,15 @@ function AdminDashboard() {
       const data = await res.json();
 
       if (!res.ok) {
-        console.log('hjdhkhak')
-        toast({
-          title: "Error",
-          description: "Error fetching stats",
-          variant: "error",
-        });
+      
+        toast(data.msg);
       } else {
-        console.log("totaldata:",data)
+        
         setTotalProblems(data.totalProblems);
         setTotaluser(data.totalUsers);
       }
-    } catch {
-      toast({
-        title: "Server Error",
-        description: "Try again later",
-        variant: "error",
-      });
+    } catch(err) {
+      toast(err.msg);
     }
   };
 

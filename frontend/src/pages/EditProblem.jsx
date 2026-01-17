@@ -15,12 +15,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import {toast} from 'react-toastify'
 
 function EditProblem() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const [testcaseMode, setTestcaseMode] = useState("upload");
 
@@ -47,23 +46,15 @@ function EditProblem() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast({
-          title: "Error",
-          description: data.msg || "Failed to fetch problem",
-          variant: "error",
-        });
+        toast(data.msg);
       } else {
         setform({
           ...data,
           tags: data.tags.join(","),
         });
       }
-    } catch {
-      toast({
-        title: "Error",
-        description: "Failed to fetch problem",
-        variant: "error",
-      });
+    } catch(err) {
+      toast(err.msg);
     }
   }
 
@@ -86,12 +77,8 @@ function EditProblem() {
       const text = await file.text();
       const parsed = JSON.parse(text);
       setform((prev) => ({ ...prev, testCases: parsed }));
-    } catch {
-      toast({
-        title: "Invalid File",
-        description: "Invalid JSON file",
-        variant: "error",
-      });
+    } catch(err) {
+      toast(err.msg);
     }
   };
 
@@ -125,25 +112,13 @@ function EditProblem() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast({
-          title: "Error",
-          description: data.msg || "Failed to update problem",
-          variant: "error",
-        });
+        toast(data.msg);
       } else {
-        toast({
-          title: "Success",
-          description: "Problem edited successfully",
-          variant: "success",
-        });
+        toast('Problem Edited successfully');
         navigate("/problems");
       }
-    } catch {
-      toast({
-        title: "Server Error",
-        description: "Try again later",
-        variant: "error",
-      });
+    } catch(err) {
+      toast('Server Error:',err.msg);
     }
   };
 
@@ -266,7 +241,7 @@ function EditProblem() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          <RadioGroup
+          {/* <RadioGroup
             value={testcaseMode}
             onValueChange={setTestcaseMode}
             className="space-y-3"
@@ -280,23 +255,22 @@ function EditProblem() {
               <RadioGroupItem value="manual" id="manual" />
               <Label htmlFor="manual">Manual Entry</Label>
             </div>
-          </RadioGroup>
+          </RadioGroup> */}
 
-          {testcaseMode === "upload" && (
+          <h2>Upload Testcases Json File</h2>
             <Input
               type="file"
               accept=".json"
               onChange={handlefilechange}
             />
-          )}
+           <Button variant="outline" onClick={downloadfile}>
+          Download Old TestCases
+        </Button>
+          
         </CardContent>
       </Card>
 
       <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6">
-        <Button variant="outline" onClick={downloadfile}>
-          Download Old TestCases
-        </Button>
-
         <Button onClick={handlesubmit}>
           Save Changes
         </Button>

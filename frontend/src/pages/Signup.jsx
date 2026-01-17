@@ -57,28 +57,17 @@ function Signup() {
       const data = await res.json()
 
       if (!res.ok) {
-        toast({
-          variant: "destructive",
-          title: "Signup failed",
-          description: data.msg || "Something went wrong",
-        })
+        toast(data.msg)
         return
       }
 
       setUser(data.user)
 
-      toast({
-        title: "Account created 🎉",
-        description: data.msg || "Welcome to the platform",
-      })
+      toast('Account Created successfully')
 
       navigate("/")
     } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-      })
+      toast(err.msg)
     } finally {
       setLoading(false)
     }
