@@ -1,167 +1,334 @@
-# 🧠 Online Judge Platform
+# Online Judge Platform
 
-A full-stack Online Judge platform inspired by LeetCode and Codeforces that allows users to solve coding problems, run code securely, and get instant feedback with AI-powered assistance.
-
----
-
-## 🚀 Live Demo
-👉[ live-link ](https://onlinejudge-pearl.vercel.app/) 
-
+A full-stack Online Judge platform inspired by coding platforms like LeetCode and Codeforces.
+The platform supports secure Dockerized code execution, coding problem management, AI-powered coding assistance, real-time verdict evaluation, and submission tracking.
 
 ---
 
-## 📌 Features
+# Features
 
-### 👨‍💻 Problem Solving
-- Browse and solve coding problems  
-- View detailed problem descriptions, constraints, and examples  
-- Multiple test case support  
+## User Features
 
-### ⚡ Code Execution
-- Run code with custom input  
-- Submit solutions for evaluation  
-- Handles:
-  - Compilation Errors  
-  - Runtime Errors  
-  - Time Limit Exceeded (TLE)  
-
-### 🐳 Secure Code Execution
-- Code runs inside isolated Docker containers  
-- Prevents unsafe execution  
-- Supports multiple programming languages  
-
-### 📊 Submissions System
-- View all past submissions  
-- Track verdicts (Accepted, Wrong Answer, TLE, Error)  
-- View submitted code  
-
-### 🤖 AI Integration
-- Code explanation  
-- Error fixing suggestions  
-- Optimization hints  
-
-### 🔐 Authentication
-- User Signup & Login  
-- JWT-based authentication  
-- Protected routes  
-
-### 🛠 Admin Features
-- Add/Edit/Delete problems  
-- Manage test cases (JSON upload/download)  
-- Admin dashboard  
+* User Authentication & Authorization
+* Solve Coding Problems
+* Online Code Editor
+* Run Code with Custom Input
+* Submit Solutions
+* View Submission History
+* AI-Based Coding Assistance
+* Responsive UI
 
 ---
 
-## 🛠 Tech Stack
+## Admin Features
 
-### Frontend
-- React  
-- Tailwind CSS  
-- React Router  
-
-### Backend
-- Node.js  
-- Express.js  
-- MongoDB  
-
-### Code Execution
-- Docker (isolated code runner container)  
-
-### AI Integration
-- Gemini API  
+* Add Problems
+* Edit Problems
+* Delete Problems
+* Upload Test Cases using JSON
+* Manage Problem Metadata
 
 ---
 
-## 📂 Folder Structure
+## Judge Features
 
+* Dockerized Code Execution
+* Isolated Compiler Backend
+* Multiple Language Support
+* Compilation Error Handling
+* Runtime Error Detection
+* Time Limit Exceeded (TLE) Detection
+* Automated Test Case Evaluation
+
+---
+
+# Tech Stack
+
+## Frontend
+
+* React
+* TypeScript
+* Tailwind CSS
+* React Router DOM
+* Context API
+
+## Main Backend
+
+* Node.js
+* Express.js
+* MongoDB
+* JWT Authentication
+
+## Compiler Backend
+
+* Node.js
+* Docker
+* Sandboxed Code Execution
+
+## AI Integration
+
+* Gemini API
+
+---
+
+# System Architecture
+
+```text
+                    +------------------+
+                    |    Frontend      |
+                    | React + TS       |
+                    +------------------+
+                              |
+                              v
+                    +------------------+
+                    | Main Backend API |
+                    | Express + Mongo  |
+                    +------------------+
+                              |
+         +----------------------------------------+
+         |                                        |
+         v                                        v
++-------------------+               +----------------------+
+| MongoDB Database  |               | Compiler Backend     |
+| Users, Problems,  |               | Dockerized Execution |
+| Submissions       |               +----------------------+
++-------------------+                           |
+                                                 v
+                                      +------------------+
+                                      | Docker Container |
+                                      | Compile & Run    |
+                                      +------------------+
 ```
-Online-Judge/
-│
-├── backend/
-│ ├── src/
-│ │ ├── config/ # Database & environment setup
-│ │ ├── controllers/ # Business logic (auth, problems, submissions)
-│ │ ├── middlewares/ # JWT auth middleware
-│ │ ├── models/ # MongoDB schemas
-│ │ ├── routes/ # API routes
-│ │ ├── services/ # Code execution & AI logic
-│ │ └── index.js # Entry point
-│ │
-│ ├── Dockerfile # Backend container config
-│ └── package.json
-│
-├── coderunner/
-│ ├── Dockerfile # Secure code execution container
-│ └── scripts/ # Compile & run scripts
+
+---
+
+# Project Structure
+
+```bash
+onlinejudge/
 │
 ├── frontend/
-│ ├── src/
-│ │ ├── components/ # UI components
-│ │ ├── pages/ # Pages (Problems, Editor, Submissions)
-│ │ ├── context/ # State management
-│ │ ├── utils/ # Helpers
-│ │ ├── App.jsx
-│ │ └── main.jsx
-│ │
-│ └── package.json
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── context/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   └── routes/
+│   │
+│   └── package.json
+│
+├── backend/
+│   ├── controllers/
+│   ├── routes/
+│   ├── middleware/
+│   ├── models/
+│   ├── services/
+│   ├── config/
+│   └── utils/
+│
+├── compilerbackend/
+│   ├── Dockerfile
+│   ├── executors/
+│   ├── temp/
+│   ├── helpers/
+│   └── scripts/
 │
 └── README.md
 ```
 
 ---
 
-## ⚙️ How It Works
+# Architecture Overview
 
-1. User logs in or signs up  
-2. Selects a coding problem  
-3. Writes code in the editor  
-4. Clicks:
-   - **Run** → executes with custom input  
-   - **Submit** → evaluated against test cases  
-5. Backend:
-   - Sends code to Docker container  
-   - Compiles and runs code securely  
-   - Captures output/errors  
-6. Returns:
-   - Verdict (Accepted / Error / TLE)  
-   - Output & execution details  
-7. AI features provide:
-   - Explanation  
-   - Fix suggestions  
-   - Optimization tips  
+The project is divided into two separate backend services.
+
+## 1. Main Backend
+
+Responsible for:
+
+* Authentication
+* Problem Management
+* Submission Management
+* User Management
+* AI Feature APIs
 
 ---
 
-## 📦 Installation & Setup
+## 2. Compiler Backend
 
-### 🔹 Clone Repository
+Responsible for:
+
+* Code Compilation
+* Secure Execution
+* Verdict Generation
+* Handling Runtime Errors
+* Time Limit Handling
+
+The compiler backend is isolated using Docker containers for security and sandboxing.
+
+---
+
+# Code Execution Workflow
+
+1. User writes code in editor
+2. Frontend sends request to Main Backend
+3. Main Backend forwards execution request to Compiler Backend
+4. Compiler Backend creates execution environment
+5. Docker container compiles and executes code
+6. Output is checked against test cases
+7. Verdict returned to frontend
+
+---
+
+# AI Features
+
+Integrated AI support using Gemini API for:
+
+* Code Explanation
+* Error Fixing
+* Optimization Suggestions
+* Problem Hints
+
+---
+
+# Authentication
+
+The platform uses JWT-based authentication.
+
+Features:
+
+* Login
+* Signup
+* Protected Routes
+* Role-Based Authorization
+
+---
+
+# Supported Verdicts
+
+* Accepted
+* Wrong Answer
+* Compilation Error
+* Runtime Error
+* Time Limit Exceeded
+
+---
+
+# Installation
+
+## Clone Repository
+
 ```bash
-git clone https://github.com/your-username/online-judge.git
-cd online-judge
+git clone https://github.com/Nikhilth123/onlinejudge.git
+cd onlinejudge
 ```
-Backend Setup
+
+---
+
+# Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
+
+---
+
+# Main Backend Setup
+
+```bash
 cd backend
 npm install
-Backend .env
-PORT=5000
-NODE_ENV=development
-
-MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_secret_key
-AI_API_KEY=your_gemini_api_key
+npm start
 ```
-Run Backend
-npm run dev
-🔹 Code Runner Setup (Docker)
+
+---
+
+# Compiler Backend Setup
 
 Make sure Docker is installed and running.
 
-cd coderunner
-docker build -t coderunner .
-🔹 Frontend Setup
-cd frontend
+```bash
+cd compilerbackend
 npm install
+docker build -t compilerbackend .
 npm start
-Frontend .env
-REACT_APP_BACKEND_URL=http://localhost:5000
+```
+
+---
+
+# Environment Variables
+
+## Backend `.env`
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_uri
+JWT_SECRET=your_secret
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+---
+
+# Security Features
+
+* Dockerized isolated code execution
+* JWT Authentication
+* Protected admin routes
+* Temporary file cleanup
+* Separate compiler backend service
+
+---
+
+# Current Limitations
+
+* CI/CD pipeline not implemented yet
+* Contest system not implemented
+* Limited language support currently
+
+---
+
+# Future Improvements
+
+* Contest System
+* Real-Time Collaboration
+* WebSocket-Based Live Verdicts
+* Leaderboards
+* Plagiarism Detection
+* Multi-Language Expansion
+* CI/CD Automation
+* Kubernetes Deployment
+
+---
+
+# Learning Outcomes
+
+This project helped in understanding:
+
+* MERN Stack Development
+* Dockerized Code Execution
+* Backend Service Separation
+* Secure Sandboxed Execution
+* JWT Authentication
+* AI Integration
+* System Design Concepts
+* API Communication Between Services
+
+---
+
+
+
+---
+
+
+---
+
+# Author
+
+Nikhil Thakur
+
+GitHub:
+https://github.com/Nikhilth123
