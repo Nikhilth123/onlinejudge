@@ -5,7 +5,7 @@ A full-stack Online Judge platform inspired by LeetCode and Codeforces that allo
 ---
 
 ## 🚀 Live Demo
-👉[ https://your-live-link.com ](https://onlinejudge-pearl.vercel.app/) 
+👉[ live-link ](https://onlinejudge-pearl.vercel.app/) 
 
 
 ---
