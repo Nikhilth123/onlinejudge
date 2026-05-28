@@ -1,7 +1,14 @@
 # Online Judge Platform
 
-A full-stack Online Judge platform inspired by coding platforms like LeetCode and Codeforces.
-The platform supports secure Dockerized code execution, coding problem management, AI-powered coding assistance, real-time verdict evaluation, and submission tracking.
+A full-stack Online Judge platform inspired by LeetCode and Codeforces that supports secure Dockerized code execution, problem solving, AI-assisted coding help, submission tracking, and admin-based problem management.
+
+The project is built using:
+
+* React + Vite frontend
+* Main Express backend
+* Separate Dockerized compiler backend
+* MongoDB database
+* Gemini AI integration
 
 ---
 
@@ -13,7 +20,7 @@ The platform supports secure Dockerized code execution, coding problem managemen
 * Solve Coding Problems
 * Online Code Editor
 * Run Code with Custom Input
-* Submit Solutions
+* Submit Code
 * View Submission History
 * AI-Based Coding Assistance
 * Responsive UI
@@ -33,12 +40,12 @@ The platform supports secure Dockerized code execution, coding problem managemen
 ## Judge Features
 
 * Dockerized Code Execution
-* Isolated Compiler Backend
-* Multiple Language Support
+* Separate Compiler Backend
 * Compilation Error Handling
 * Runtime Error Detection
-* Time Limit Exceeded (TLE) Detection
-* Automated Test Case Evaluation
+* Time Limit Exceeded (TLE)
+* Automated Test Case Validation
+* Multi-language Execution Support
 
 ---
 
@@ -47,10 +54,10 @@ The platform supports secure Dockerized code execution, coding problem managemen
 ## Frontend
 
 * React
-* TypeScript
+* Vite
 * Tailwind CSS
-* React Router DOM
 * Context API
+* React Router DOM
 
 ## Main Backend
 
@@ -58,12 +65,14 @@ The platform supports secure Dockerized code execution, coding problem managemen
 * Express.js
 * MongoDB
 * JWT Authentication
+* Cloudinary
 
 ## Compiler Backend
 
 * Node.js
 * Docker
-* Sandboxed Code Execution
+* Child Processes
+* Isolated Sandboxed Execution
 
 ## AI Integration
 
@@ -73,100 +82,137 @@ The platform supports secure Dockerized code execution, coding problem managemen
 
 # System Architecture
 
-```text
-                    +------------------+
-                    |    Frontend      |
-                    | React + TS       |
-                    +------------------+
-                              |
-                              v
-                    +------------------+
-                    | Main Backend API |
-                    | Express + Mongo  |
-                    +------------------+
-                              |
-         +----------------------------------------+
-         |                                        |
-         v                                        v
-+-------------------+               +----------------------+
-| MongoDB Database  |               | Compiler Backend     |
-| Users, Problems,  |               | Dockerized Execution |
-| Submissions       |               +----------------------+
-+-------------------+                           |
-                                                 v
-                                      +------------------+
-                                      | Docker Container |
-                                      | Compile & Run    |
-                                      +------------------+
+```text id="g74c1v"
+                    +----------------------+
+                    |      Frontend        |
+                    |   React + Vite       |
+                    +----------------------+
+                               |
+                               v
+                    +----------------------+
+                    |     Main Backend     |
+                    | Express + MongoDB    |
+                    +----------------------+
+                               |
+         +---------------------------------------------+
+         |                                             |
+         v                                             v
++----------------------+                 +---------------------------+
+| MongoDB Database     |                 |    Compiler Backend      |
+| Users, Problems,     |                 | Dockerized Code Runner   |
+| Submissions          |                 +---------------------------+
++----------------------+                               |
+                                                        v
+                                            +----------------------+
+                                            |   Docker Container   |
+                                            | Compile & Execute    |
+                                            +----------------------+
 ```
 
 ---
 
 # Project Structure
 
-```bash
+```bash id="f2vv7d"
 onlinejudge/
 │
 ├── frontend/
+│   ├── public/
 │   ├── src/
+│   │   ├── Context/
+│   │   ├── Layouts/
 │   │   ├── components/
+│   │   ├── lib/
 │   │   ├── pages/
-│   │   ├── context/
-│   │   ├── hooks/
-│   │   ├── services/
 │   │   ├── utils/
-│   │   └── routes/
+│   │   ├── App.jsx
+│   │   └── main.jsx
 │   │
-│   └── package.json
+│   ├── package.json
+│   └── vite.config.js
 │
 ├── backend/
-│   ├── controllers/
-│   ├── routes/
-│   ├── middleware/
-│   ├── models/
-│   ├── services/
-│   ├── config/
-│   └── utils/
+│   ├── Controller/
+│   ├── Middlewares/
+│   ├── Model/
+│   ├── Routes/
+│   ├── Utils/
+│   ├── app.js
+│   ├── Connection.js
+│   └── cronecleaner.js
 │
 ├── compilerbackend/
-│   ├── Dockerfile
+│   ├── codes/
+│   ├── controllers/
 │   ├── executors/
-│   ├── temp/
-│   ├── helpers/
-│   └── scripts/
+│   ├── formaterrors/
+│   ├── inputs/
+│   ├── outputs/
+│   ├── routes/
+│   ├── Dockerfile
+│   ├── generateFile.js
+│   ├── generateinputfile.js
+│   ├── index.js
+│   └── cronecleaner.js
 │
 └── README.md
 ```
 
 ---
 
-# Architecture Overview
+# Backend Architecture
 
-The project is divided into two separate backend services.
-
-## 1. Main Backend
-
-Responsible for:
-
-* Authentication
-* Problem Management
-* Submission Management
-* User Management
-* AI Feature APIs
+The platform uses two separate backend services.
 
 ---
 
-## 2. Compiler Backend
+# 1. Main Backend
 
-Responsible for:
+Handles:
 
-* Code Compilation
-* Secure Execution
-* Verdict Generation
-* Handling Runtime Errors
-* Time Limit Handling
+* Authentication
+* User Management
+* Problem Management
+* Submission Storage
+* AI Features
+* Cloudinary Uploads
 
-The compiler backend is isolated using Docker containers for security and sandboxing.
+Folder Responsibilities:
+
+| Folder      | Purpose                             |
+| ----------- | ----------------------------------- |
+| Controller  | Business logic                      |
+| Routes      | API endpoints                       |
+| Model       | MongoDB schemas                     |
+| Middlewares | Authentication & request middleware |
+| Utils       | Helper functions                    |
+
+---
+
+# 2. Compiler Backend
+
+Dedicated backend for secure code execution.
+
+Responsibilities:
+
+* Code compilation
+* Code execution
+* Runtime handling
+* Verdict generation
+* File generation
+* Dockerized sandboxing
+
+Important folders:
+
+| Folder       | Purpose                |
+| ------------ | ---------------------- |
+| executors    | Language executors     |
+| controllers  | Execution logic        |
+| routes       | Execution APIs         |
+| codes        | Generated source files |
+| inputs       | Input test cases       |
+| outputs      | Execution outputs      |
+| formaterrors | Error formatting       |
 
 ---
 
@@ -175,9 +221,9 @@ The compiler backend is isolated using Docker containers for security and sandbo
 1. User writes code in editor
 2. Frontend sends request to Main Backend
 3. Main Backend forwards execution request to Compiler Backend
-4. Compiler Backend creates execution environment
+4. Compiler Backend generates source/input files
 5. Docker container compiles and executes code
-6. Output is checked against test cases
+6. Output is compared with expected output
 7. Verdict returned to frontend
 
 ---
@@ -195,14 +241,12 @@ Integrated AI support using Gemini API for:
 
 # Authentication
 
-The platform uses JWT-based authentication.
-
-Features:
+JWT-based authentication system with:
 
 * Login
 * Signup
 * Protected Routes
-* Role-Based Authorization
+* Admin Authorization
 
 ---
 
@@ -220,7 +264,7 @@ Features:
 
 ## Clone Repository
 
-```bash
+```bash id="ozd8kx"
 git clone https://github.com/Nikhilth123/onlinejudge.git
 cd onlinejudge
 ```
@@ -229,7 +273,7 @@ cd onlinejudge
 
 # Frontend Setup
 
-```bash
+```bash id="zsl0h8"
 cd frontend
 npm install
 npm run dev
@@ -239,7 +283,7 @@ npm run dev
 
 # Main Backend Setup
 
-```bash
+```bash id="sdxjlwm"
 cd backend
 npm install
 npm start
@@ -249,9 +293,9 @@ npm start
 
 # Compiler Backend Setup
 
-Make sure Docker is installed and running.
+Make sure Docker Desktop is installed and running.
 
-```bash
+```bash id="jq4k77"
 cd compilerbackend
 npm install
 docker build -t compilerbackend .
@@ -264,10 +308,13 @@ npm start
 
 ## Backend `.env`
 
-```env
+```env id="wv1yjp"
 PORT=5000
 MONGO_URI=your_mongodb_uri
 JWT_SECRET=your_secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
@@ -275,11 +322,12 @@ GEMINI_API_KEY=your_gemini_api_key
 
 # Security Features
 
-* Dockerized isolated code execution
-* JWT Authentication
-* Protected admin routes
+* Dockerized isolated execution
+* Separate compiler backend
+* JWT authentication
+* Protected admin APIs
 * Temporary file cleanup
-* Separate compiler backend service
+* Sandboxed execution environment
 
 ---
 
@@ -287,7 +335,8 @@ GEMINI_API_KEY=your_gemini_api_key
 
 * CI/CD pipeline not implemented yet
 * Contest system not implemented
-* Limited language support currently
+* Limited language support
+* No distributed execution currently
 
 ---
 
@@ -295,12 +344,12 @@ GEMINI_API_KEY=your_gemini_api_key
 
 * Contest System
 * Real-Time Collaboration
-* WebSocket-Based Live Verdicts
 * Leaderboards
+* WebSocket-Based Live Verdicts
 * Plagiarism Detection
-* Multi-Language Expansion
-* CI/CD Automation
 * Kubernetes Deployment
+* Multi-language Expansion
+* Distributed Judge Workers
 
 ---
 
@@ -308,18 +357,17 @@ GEMINI_API_KEY=your_gemini_api_key
 
 This project helped in understanding:
 
-* MERN Stack Development
+* MERN Stack Architecture
 * Dockerized Code Execution
-* Backend Service Separation
+* Microservice-like Backend Separation
 * Secure Sandboxed Execution
 * JWT Authentication
+* Cloudinary Integration
 * AI Integration
 * System Design Concepts
-* API Communication Between Services
+* Backend Communication
 
 ---
-
-
 
 ---
 
