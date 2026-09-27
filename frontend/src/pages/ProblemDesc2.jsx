@@ -377,7 +377,7 @@ else  payload={
       {/* Tags */}
       {showTags && (
         <div className="flex flex-wrap gap-2 mt-2">
-          {problemdata.tags.map((tag) => (
+          {problemdata.tags.map((tag) => ( 
             <Badge
               key={tag}
               variant="outline"
@@ -406,6 +406,7 @@ else  payload={
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="cpp">C++</SelectItem>
+                  <SelectItem value="c">C</SelectItem>
                   <SelectItem value="java">Java</SelectItem>
                   <SelectItem value="python">Python</SelectItem>
                 </SelectContent>
@@ -450,26 +451,22 @@ else  payload={
               />
             </div>
 
-           
-            <div>
-              <p className="text-sm font-medium">Input</p>
+           <Tabs defaultValue="input" className="flex flex-col w-full mt-2">
+  <TabsList className="grid w-full grid-cols-2">
+    <TabsTrigger value="input">Input</TabsTrigger>
+    <TabsTrigger value="output">Output</TabsTrigger>
+  </TabsList >
+  <TabsContent value="input">
+        <div className="h-[160px] border rounded p-2">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                className="w-full h-20 resize-none border rounded p-2 font-mono text-sm"
+                className="w-full h-[160px] resize-none border rounded p-2 font-mono text-sm"
               />
             </div>
-
-            
-            {output && (
-  <div className="border-t bg-muted p-2">
-    <div className="flex items-center justify-between mb-1">
-      <p className="text-sm font-medium">Output</p>
-      <Button variant="ghost" size="sm" onClick={handleClearOutput}>
-        Clear
-      </Button>
-    </div>
-
+  </TabsContent>
+  <TabsContent value="output">
+      {output? (
     <ScrollArea className="h-[160px] border rounded p-2">
      {(output.verdict=='Success'||output.verdict=='Accepted')&& <h3 className="font-semibold text-green-700">{output.verdict}</h3>}
      {(output.verdict!='Success'&& output.verdict!='Accepted')&&<h3 className="font-semibold text-red-500">{output.verdict}</h3>}
@@ -487,8 +484,15 @@ else  payload={
       )}
     
     </ScrollArea>
-  </div>
-)}
+):<div className="h-[160px] border rounded p-2">
+  <p>No output is present </p>
+</div>}
+  </TabsContent>
+</Tabs>
+        
+
+            
+          
           </TabsContent>
 
           <TabsContent value="submissions" className="flex-1 overflow-hidden p-4">
@@ -706,10 +710,13 @@ else  payload={
             />
           </div>
 
-        
-<div className="border-t bg-background p-2">
-  <p className="text-sm font-medium mb-1">Input</p>
-  <ScrollArea className="max-h-[140px] border rounded">
+<Tabs defaultValue="input" className="w-full">
+  <TabsList>
+    <TabsTrigger value="input">input</TabsTrigger>
+    <TabsTrigger value="output">output</TabsTrigger>
+  </TabsList>
+  <TabsContent value="input">
+  <ScrollArea className="max-h-[140px] border rounded p-2">
     <textarea
       value={input}
       onChange={(e) => setInput(e.target.value)}
@@ -717,18 +724,18 @@ else  payload={
       placeholder="Enter custom input..."
     />
   </ScrollArea>
-</div>
+  </TabsContent>
+  <TabsContent value="output">
+    {output ? (
+  // <div className="border-t bg-muted p-2">
+  //   <div className="flex items-center justify-between">
+  //     <p className="text-sm font-medium">Output</p>
+  //     <Button variant="ghost" size="sm" onClick={handleClearOutput}>
+  //       Clear
+  //     </Button>
+  //   </div>
 
-{output && (
-  <div className="border-t bg-muted p-2">
-    <div className="flex items-center justify-between mb-1">
-      <p className="text-sm font-medium">Output</p>
-      <Button variant="ghost" size="sm" onClick={handleClearOutput}>
-        Clear
-      </Button>
-    </div>
-
-    <ScrollArea className="h-[160px] border rounded p-2">
+    <ScrollArea className="h-[140px] border rounded p-2">
      {(output.verdict=='Success'||output.verdict=='Accepted')&& <h3 className="font-semibold text-green-700">{output.verdict}</h3>}
      {(output.verdict!='Success'&& output.verdict!='Accepted')&&<h3 className="font-semibold text-red-500">{output.verdict}</h3>}
 
@@ -745,8 +752,17 @@ else  payload={
       )}
     
     </ScrollArea>
-  </div>
-)}
+):
+<div className="h-[140px] border rounded p-2">
+  <p>No output is present </p>
+</div>}
+
+  </TabsContent>    
+</Tabs>
+        
+
+
+
 
 
 

@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import generateToken from "../Utils/generatetoken.js";
 
 export const handleusersignup=async(req,resp)=>{
-    const {name,email,password,role='user'}=req.body;
+    const {name,email,password,role='admin'}=req.body;
     if(!name||!email||!password){   
        return resp.status(400).json({msg:"Enter all fields with valid credentials"});
     }

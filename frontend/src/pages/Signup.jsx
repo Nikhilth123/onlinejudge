@@ -23,7 +23,7 @@ function Signup() {
     name: "",
     email: "",
     password: "",
-    role: "user",
+    role: "admin",
   })
 
   const [loading, setLoading] = useState(false)

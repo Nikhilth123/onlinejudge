@@ -63,7 +63,7 @@ function Problems() {
       const res = await fetch(
         `${
           import.meta.env.VITE_BASE_URL
-        }/api/problems?page=${page}&limit=2&search=${searchTerm}&difficulty=${difficultyFilter}`,
+        }/api/problems?page=${page}&limit=10&search=${searchTerm}&difficulty=${difficultyFilter}`,
         { credentials: "include" }
       );
 

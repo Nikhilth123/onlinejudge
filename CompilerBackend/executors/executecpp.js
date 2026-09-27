@@ -28,7 +28,7 @@ const executecpp=(filepath,inputfilepath)=>{
             });
         }
         const runcmd=`"${outputfile}" < "${inputfilepath}"`
-        exec(runcmd,{shell:true,timeout:2000},(runerr,runstdout,runstderr)=>{
+        exec(runcmd,{shell:true,timeout:10000},(runerr,runstdout,runstderr)=>{
             const end=Date.now();
             const time=end-start;
             if(runerr){

@@ -22,7 +22,7 @@ const app = express();
 const url = `${process.env.MONGO_URL}`;
 connectmongodb(url)
   .then(() => console.log("connected to mongodb"))
-  .catch((err) => console.log(console.err));
+  .catch((err) => console.log(err));
 
 app.use(cors({
   origin: process.env.FRONTEND_URL,
